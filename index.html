@@ -2,462 +2,489 @@
 <html lang="hr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fantasy Manager – kupi igrače, prati vrijednost (demo, virtualni krediti)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0b0f17">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E⚽%3C/text%3E%3C/svg%3E">
+<title>Nogometna burza igrača – virtualni krediti</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#0b0f17;--panel:#131a26;--panel2:#1a2333;--line:#253047;--txt:#e6ebf5;--mut:#8b97ad;--acc:#3b82f6;--up:#22c55e;--down:#ef4444;--warn:#f59e0b}
-*{box-sizing:border-box}
-body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--txt);font-size:15px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,Roboto,sans-serif;font-size:16px}
+body{padding-bottom:calc(70px + env(safe-area-inset-bottom))}
 button{font:inherit;cursor:pointer}
-.disclaimer{background:#3a2a06;color:#fcd34d;text-align:center;padding:8px 12px;font-size:13px;border-bottom:1px solid #5b4310}
-header{position:sticky;top:0;z-index:5;background:rgba(11,15,23,.95);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
-.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;max-width:1100px;margin:0 auto;flex-wrap:wrap}
-.logo{font-weight:800;font-size:19px}.logo span{color:var(--acc)}
-.bal{display:flex;gap:16px;font-size:13px;color:var(--mut)}.bal b{display:block;color:var(--txt);font-size:16px}
-nav{display:flex;gap:4px;max-width:1100px;margin:0 auto;padding:0 12px}
-nav button{background:none;border:0;color:var(--mut);padding:10px 14px;border-bottom:2px solid transparent}
-nav button.on{color:var(--txt);border-color:var(--acc)}
-main{max-width:1100px;margin:0 auto;padding:16px;display:grid;grid-template-columns:1fr 300px;gap:16px}
-@media(max-width:860px){main{grid-template-columns:1fr}}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
-h2{margin:0 0 12px;font-size:17px}
-.toolbar{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
-input,select{background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:8px 10px;font:inherit}
-.row{display:grid;grid-template-columns:40px 1fr 110px 80px;align-items:center;gap:10px;padding:10px 6px;border-bottom:1px solid var(--line);cursor:pointer;border-radius:8px}
-.row:hover{background:var(--panel2)}
-.av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff}
-.nm{font-weight:600}.sub{color:var(--mut);font-size:12px}
-.pr{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
-.ch{text-align:right;font-variant-numeric:tabular-nums;font-size:13px;padding:3px 6px;border-radius:6px}
-.up{color:var(--up)}.down{color:var(--down)}
-.ch.up{background:rgba(34,197,94,.12)}.ch.down{background:rgba(239,68,68,.12)}
-.flash-up{animation:fu .8s}.flash-down{animation:fd .8s}
-@keyframes fu{from{background:rgba(34,197,94,.3)}}@keyframes fd{from{background:rgba(239,68,68,.3)}}
-.news{list-style:none;margin:0;padding:0;max-height:520px;overflow:auto}
-.news li{padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
-.news .t{color:var(--mut);font-size:11px}
-.tag{display:inline-block;font-size:10px;background:#334155;color:#cbd5e1;padding:1px 6px;border-radius:4px;margin-left:4px;vertical-align:middle}
-.hidden{display:none!important}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:20;padding:12px}
-.mbox{background:var(--panel);border:1px solid var(--line);border-radius:14px;max-width:640px;width:100%;max-height:95vh;overflow:auto;padding:18px}
-.mhead{display:flex;gap:12px;align-items:center}.mhead .av{width:52px;height:52px;font-size:17px}
-.x{margin-left:auto;background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:8px;width:34px;height:34px}
-.big{font-size:26px;font-weight:800;margin:12px 0 2px}
-svg{width:100%;height:auto;display:block}
-.note{font-size:11px;color:var(--warn);margin-top:4px}
-.trade{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}
-.trade input{width:90px}
-.btn{border:0;border-radius:8px;padding:9px 16px;font-weight:700;color:#fff}
+input,select{font:inherit;font-size:16px;background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:10px 12px}
+.disclaimer{background:#3a2a06;color:#fcd34d;text-align:center;padding:7px 12px;font-size:12.5px;padding-top:calc(7px + env(safe-area-inset-top))}
+.demo-banner{background:#3b0764;color:#e9d5ff;text-align:center;padding:6px;font-size:12.5px}
+header{position:sticky;top:0;z-index:5;background:rgba(11,15,23,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;max-width:900px;margin:0 auto}
+.logo{font-weight:800;font-size:18px}.logo span{color:var(--acc)}
+.me{text-align:right;font-size:12px;color:var(--mut)}.me b{display:block;color:var(--txt);font-size:16px}
+main{max-width:900px;margin:0 auto;padding:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+h2{margin:0 0 10px;font-size:18px}
+.sub{color:var(--mut);font-size:13px}
+.how{background:linear-gradient(135deg,#1e3a8a55,#14532d55);border:1px solid #2b4a7a}
+.how ol{margin:6px 0 6px;padding-left:22px;line-height:1.65;font-size:15.5px}
+.how .x{float:right;background:none;border:0;color:var(--mut);font-size:20px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.toolbar input{flex:1 1 100%}.toolbar select{flex:1}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px;scrollbar-width:none}
+.chips button{flex:0 0 auto;background:var(--panel2);border:1px solid var(--line);color:var(--mut);border-radius:20px;padding:6px 12px;font-size:14px}
+.chips button.on{color:#fff;border-color:var(--acc);background:#1e3a8a}
+.row{display:grid;grid-template-columns:40px 1fr auto;gap:4px 10px;align-items:center;padding:12px 2px;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff;grid-row:span 2;align-self:start}
+.nm{font-weight:650;font-size:16px;line-height:1.2}
+.right{text-align:right;white-space:nowrap}
+.price{font-weight:700;font-variant-numeric:tabular-nums}
+.ch{font-size:13px;font-variant-numeric:tabular-nums}
+.up{color:var(--up)}.down{color:var(--down)}.flat{color:var(--mut)}
+.btns{grid-column:2 / 4;display:flex;gap:8px;align-items:center;margin-top:6px}
+.btns .info{flex:1;font-size:12.5px;color:var(--mut)}
+.big{border:0;border-radius:12px;padding:11px 0;min-width:92px;font-weight:800;font-size:16px;color:#fff}
 .buy{background:var(--up)}.sell{background:var(--down)}.ghost{background:var(--panel2);border:1px solid var(--line);color:var(--txt)}
-.btn:disabled{opacity:.4;cursor:not-allowed}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
-.stat{background:var(--panel2);border-radius:10px;padding:10px}.stat .sub{margin-bottom:4px}.stat b{font-size:18px}
-table{width:100%;border-collapse:collapse;font-size:14px}
-th,td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
-th:first-child,td:first-child{text-align:left}th{color:var(--mut);font-weight:500;font-size:12px}
-.tblwrap{overflow-x:auto}
-.msg{min-height:20px;font-size:13px;margin-top:8px}
-.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--line);padding:10px 16px;border-radius:10px;z-index:30;font-size:14px}
-footer{max-width:1100px;margin:0 auto;padding:16px;color:var(--mut);font-size:12px;text-align:center}
-.tabs-range{display:flex;gap:4px;margin-top:8px}.tabs-range button{background:var(--panel2);border:1px solid var(--line);color:var(--mut);border-radius:6px;padding:3px 10px;font-size:12px}.tabs-range button.on{color:var(--txt);border-color:var(--acc)}
-</style>
-<style>
-main>*,section,aside{min-width:0}
-nav{overflow-x:auto}nav button{white-space:nowrap}
-@media(max-width:600px){
- .row{grid-template-columns:36px auto 1fr 96px;row-gap:8px;column-gap:8px}
- .row .av{grid-row:span 2;align-self:start}.row>div:nth-child(2){grid-column:2 / 5;grid-row:1}
- .row .pr,.row .ch{white-space:nowrap}.row .av{grid-row:1!important}
- .row .pr{grid-column:2;grid-row:2;text-align:left}.row .ch{grid-column:3;grid-row:2;justify-self:start}
- .row .rowbtn{grid-column:4;grid-row:2}
- .bal{gap:10px}.bal b{font-size:14px}main{padding:10px}.toolbar select{flex:1}
- .how ol{font-size:15px}
- .bal>div:nth-child(4),.bal>div:nth-child(5){display:none}
- .bal{font-size:11px}
-}
+.big:disabled{opacity:.35}
+.tag{display:inline-block;font-size:10.5px;background:#334155;color:#cbd5e1;padding:1px 6px;border-radius:4px;vertical-align:middle;margin-left:4px}
+.tag.mine{background:#1e3a8a;color:#dbeafe}
+.flash{animation:fl 1.2s}@keyframes fl{from{background:rgba(59,130,246,.25)}}
+nav.bottom{position:fixed;bottom:0;left:0;right:0;z-index:6;display:flex;background:rgba(19,26,38,.97);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);backdrop-filter:blur(8px)}
+nav.bottom button{flex:1;background:none;border:0;color:var(--mut);padding:9px 0 8px;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav.bottom button .i{font-size:21px}
+nav.bottom button.on{color:#fff}
+.hidden{display:none!important}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.stat{background:var(--panel2);border-radius:10px;padding:10px}.stat b{font-size:17px;display:block;margin-top:2px}
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--panel);border-top-left-radius:18px;border-top-right-radius:18px;width:100%;max-width:640px;max-height:92vh;overflow:auto;padding:14px 16px calc(16px + env(safe-area-inset-bottom));border:1px solid var(--line)}
+.grab{width:40px;height:5px;background:#334155;border-radius:3px;margin:0 auto 10px}
+.sh-head{display:flex;gap:12px;align-items:center}.sh-head .av{grid-row:auto;align-self:center;width:48px;height:48px}
+.close{margin-left:auto;background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:50%;width:36px;height:36px;font-size:16px}
+.bigprice{font-size:28px;font-weight:800;margin:10px 0 0}
+.stepper{display:flex;align-items:center;gap:8px;margin:12px 0 4px}
+.stepper button{width:48px;height:48px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);color:var(--txt);font-size:22px}
+.stepper input{width:80px;text-align:center;font-size:20px;font-weight:700}
+.quick{display:flex;gap:6px;margin-bottom:8px}.quick button{flex:1;background:var(--panel2);border:1px solid var(--line);color:var(--mut);border-radius:8px;padding:6px 0;font-size:13px}
+.quote{background:var(--panel2);border-radius:10px;padding:10px;font-size:14px;line-height:1.6}
+.actions{display:flex;gap:10px;margin-top:10px}.actions .big{flex:1;padding:14px 0}
+.msg{min-height:22px;margin-top:8px;font-size:14px}
+.trades{list-style:none;padding:0;margin:0;font-size:14px}.trades li{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--line)}
+svg{width:100%;height:auto;display:block}
+table{width:100%;border-collapse:collapse;font-size:14.5px}td,th{padding:9px 4px;border-bottom:1px solid var(--line);text-align:right}td:first-child,th:first-child,td:nth-child(2),th:nth-child(2){text-align:left}th{color:var(--mut);font-weight:500;font-size:12px}
+tr.me td{background:rgba(59,130,246,.15);font-weight:700}
+.overlay{position:fixed;inset:0;background:var(--bg);z-index:30;display:flex;align-items:center;justify-content:center;padding:20px}
+.overlay .card{max-width:420px;width:100%}
+.overlay input{width:100%;margin:10px 0}
+.toast{pointer-events:none;position:fixed;left:50%;transform:translateX(-50%);top:calc(12px + env(safe-area-inset-top));box-shadow:0 6px 24px #000a;background:#1f2a3d;border:1px solid var(--line);padding:10px 16px;border-radius:12px;z-index:40;font-size:14px;max-width:92vw;text-align:center}
+.live{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--up);margin-right:5px;animation:pl 2s infinite}@keyframes pl{50%{opacity:.3}}
+footer{max-width:900px;margin:0 auto;padding:6px 14px 16px;color:var(--mut);font-size:12px;text-align:center}
+@media(min-width:700px){.stats{grid-template-columns:repeat(4,1fr)}.sheet-bg{align-items:center}.sheet{border-radius:18px}}
 </style>
 </head>
 <body>
-<style>
-.pos-pill{display:inline-block;font-size:11px;padding:1px 6px;border-radius:4px;background:#334155;color:#cbd5e1;margin-right:4px}
-.pos-GK{background:#854d0e;color:#fef3c7}.pos-DEF{background:#1e3a8a;color:#dbeafe}.pos-MID{background:#14532d;color:#dcfce7}.pos-FWD{background:#7f1d1d;color:#fee2e2}
-.limits{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;font-size:13px}
-.limits div{background:var(--panel2);border-radius:8px;padding:6px 10px}
-.round{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--panel2);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:14px}
-.bar{flex:1;min-width:120px;height:6px;background:#253047;border-radius:3px;overflow:hidden}.bar i{display:block;height:100%;background:var(--acc)}
-.prize{display:flex;gap:12px;align-items:center;padding:12px;border-radius:10px;background:var(--panel2);margin-bottom:8px}
-.prize .medal{font-size:30px}
-.x-unused{background:linear-gradient(#14532d,#166534);border-radius:12px;padding:12px 6px;margin-bottom:14px;display:flex;flex-direction:column;gap:10px}
-.line{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
-.chip{display:flex;flex-direction:column;align-items:center;width:74px;font-size:11px;text-align:center;cursor:pointer}
-.chip .av{width:36px;height:36px;border:2px solid #fff3}
-.chip.empty .av{background:#0003;border:2px dashed #fff5}
-.how{background:linear-gradient(135deg,#1e3a8a55,#14532d55);border:1px solid #2b4a7a;border-radius:12px;padding:14px 16px;margin-bottom:16px}
-.how ol{margin:6px 0 8px;padding-left:22px;font-size:16px;line-height:1.7}
-.row{grid-template-columns:40px 1fr auto auto 96px}
-.rowbtn{border:0;border-radius:10px;padding:11px 0;width:96px;font-weight:800;font-size:16px;color:#fff}
-.rowbtn.buy{background:var(--up)}.rowbtn.sell{background:var(--down)}.rowbtn:disabled{opacity:.35;cursor:not-allowed}
-.gain{font-size:12px;font-weight:600}
-</style>
-<div class="disclaimer">⚠️ <b>DEMO IGRA</b> – koriste se isključivo <b>virtualni krediti</b> bez ikakve novčane vrijednosti. Nema pravog novca. Vrijednosti igrača, utakmice i događaji su simulirani.</div>
+<div class="disclaimer">⚠️ <b>DEMO IGRA</b> s <b>virtualnim kreditima</b> – nema pravog novca, ništa se ne može isplatiti. Nije stvarno ulaganje.</div>
+<div class="demo-banner hidden" id="demoBanner">🧪 Lokalni demo način – bez poslužitelja, vidiš samo svoje kupnje.</div>
 <header>
   <div class="top">
-    <div class="logo">⚽ Fantasy <span>Manager</span></div>
-    <div class="bal">
-      <div>Krediti<b id="hCash">–</b></div>
-      <div>Vrijednost mojih igrača<b id="hPort">–</b></div>
-      <div>Zarada<b id="hGain">–</b></div>
-      <div>Bodovi<b id="hPts">–</b></div>
-      <div>Rezultat<b id="hScore">–</b></div>
-    </div>
+    <div class="logo">⚽ Nogometna <span>burza</span></div>
+    <div class="me" id="meBox"><span id="nickLbl">…</span><b id="hCredits">–</b></div>
   </div>
-  <nav>
-    <button data-tab="trziste" class="on">Igrači</button>
-    <button data-tab="momcad">Moji igrači</button>
-    <button data-tab="ljestvica">Ljestvica</button>
-    <button data-tab="nagrade">Nagrade</button>
-  </nav>
 </header>
 
 <main>
-  <section>
-    <div id="howWrap">
-      <div class="how" id="how">
-        <h2>Kako igrati?</h2>
-        <ol>
-          <li><b>Odaberi igrača</b> s popisa ispod.</li>
-          <li>Klikni zeleni gumb <b>Kupi</b>.</li>
-          <li><b>Prati kako mu raste vrijednost</b> i klikni <b>Prodaj</b> kad zaradiš.</li>
-        </ol>
-        <div class="sub">Imaš 100 mil. virtualnih kredita. Možeš kupiti koliko god igrača želiš dok ti ima kredita. Klikni na ime igrača za graf vrijednosti.</div>
-      </div>
+  <section id="tab-market">
+    <div class="card how" id="howBox">
+      <button class="x" id="howClose" aria-label="Sakrij">✕</button>
+      <h2>Kako igrati?</h2>
+      <ol>
+        <li><b>Odaberi igrača</b> i klikni zeleni gumb <b>Kupi</b>.</li>
+        <li><b>Cijenu određuju samo igrači ove igre:</b> kad ga drugi kupuju, cijena raste; kad prodaju, pada.</li>
+        <li>Kad mu cijena naraste, klikni <b>Prodaj</b> i zaradi kredite. 💡 Kupi rano – dok je jeftin!</li>
+      </ol>
+      <div class="sub">Svaki sudionik počinje sa 100.000 virtualnih kredita. Pri prodaji se plaća naknada od 2 %.</div>
     </div>
-    <div class="round" id="roundBox"></div>
-
-    <div id="tab-trziste" class="card">
-      <h2>Igrači</h2>
+    <div class="card">
+      <h2><span class="live"></span>Tržište</h2>
       <div class="toolbar">
-        <input id="q" placeholder="Pretraži igrača ili klub…" style="flex:1;min-width:160px">
+        <input id="q" placeholder="🔍 Traži igrača ili klub…" autocomplete="off">
         <select id="sort">
-          <option value="price">Sortiraj: vrijednost</option>
-          <option value="change">Sortiraj: promjena u kolu</option>
-          <option value="own">Prvo moji igrači</option>
-          <option value="pts">Sortiraj: bodovi u sezoni</option>
-          <option value="name">Sortiraj: ime</option>
-        </select>
-        <select id="filt">
-          <option value="">Sve pozicije</option>
-          <option value="GK">Vratari</option><option value="DEF">Braniči</option>
-          <option value="MID">Vezni</option><option value="FWD">Napadači</option>
-          <option value="hr">🇭🇷 Hrvatski igrači</option>
+          <option value="price">Najskuplji</option>
+          <option value="cheap">Najjeftiniji</option>
+          <option value="chg">Najveći rast (24 h)</option>
+          <option value="drop">Najveći pad (24 h)</option>
+          <option value="owners">Najviše vlasnika</option>
+          <option value="name">Ime (A–Ž)</option>
         </select>
       </div>
-      <div id="list"></div>
-    </div>
-
-    <div id="tab-momcad" class="card hidden">
-      <h2>Moji igrači</h2>
-      <div class="stats" id="pStats"></div>
-      <div class="tblwrap"><table id="pTable"></table></div>
-      <h2 style="margin-top:20px">Povijest kupnji i prodaja</h2>
-      <div class="tblwrap"><table id="txTable"></table></div>
-      <div style="margin-top:18px"><button class="btn ghost" id="resetBtn">↺ Resetiraj igru (vrati na 100 mil. kredita)</button></div>
-    </div>
-
-    <div id="tab-ljestvica" class="card hidden">
-      <h2>Ljestvica menadžera</h2>
-      <p class="sub">Ostali menadžeri su izmišljeni (simulirani). Rezultat = bodovi iz događaja tvojih igrača + zarada (10 bodova za svaki 1 mil. kredita zarade iznad početnih 100 mil.).</p>
-      <div class="tblwrap"><table id="lbTable"></table></div>
-    </div>
-
-    <div id="tab-nagrade" class="card hidden">
-      <h2>Nagrade <span class="tag">PRIMJER</span></h2>
-      <p class="sub">Ovo je samo <b>primjer</b> kako bi mogle izgledati nagrade za najbolje menadžere na kraju sezone. U ovoj demo verziji nagrade se ne dodjeljuju.</p>
-      <div class="prize"><div class="medal">🥇</div><div><div class="nm">1. mjesto</div><div class="sub">Primjer: potpisani dres po izboru + 2 ulaznice za utakmicu</div></div></div>
-      <div class="prize"><div class="medal">🥈</div><div><div class="nm">2. mjesto</div><div class="sub">Primjer: originalni klupski dres</div></div></div>
-      <div class="prize"><div class="medal">🥉</div><div><div class="nm">3. mjesto</div><div class="sub">Primjer: službena nogometna lopta</div></div></div>
-      <div class="prize"><div class="medal">🎖️</div><div><div class="nm">4.–10. mjesto</div><div class="sub">Primjer: digitalna značka „Top 10 menadžer sezone”</div></div></div>
-      <div class="prize"><div class="medal">⭐</div><div><div class="nm">Menadžer kola</div><div class="sub">Primjer: posebna značka za najviše bodova u jednom kolu</div></div></div>
-      <p class="note">Napomena: nagrade, uvjeti sudjelovanja i način dodjele ovise o službenim pravilima igre. Prikazane nagrade služe isključivo kao ilustracija.</p>
+      <div class="chips" id="chips">
+        <button data-f="" class="on">Svi</button>
+        <button data-f="cro">🇭🇷 Hrvati</button>
+        <button data-f="HNL">HNL</button>
+        <button data-f="talent">🌱 Talenti</button>
+        <button data-f="zvijezda">⭐ Zvijezde</button>
+        <button data-f="mine">Moji</button>
+      </div>
+      <div id="list"><p class="sub">Učitavanje…</p></div>
     </div>
   </section>
 
-  <aside class="card">
-    <h2>Vijesti s utakmica <span class="tag">SIMULIRANO</span></h2>
-    <ul class="news" id="news"></ul>
-  </aside>
+  <section id="tab-mine" class="hidden">
+    <div class="card">
+      <h2>Moji igrači</h2>
+      <div class="stats" id="mStats"></div>
+      <div id="mList"></div>
+    </div>
+    <div class="card">
+      <h2>Moje zadnje transakcije</h2>
+      <ul class="trades" id="myTrades"></ul>
+    </div>
+  </section>
+
+  <section id="tab-board" class="hidden">
+    <div class="card">
+      <h2>Ljestvica</h2>
+      <p class="sub">Stvarni sudionici ove igre. Ukupno = krediti + iznos koji bi dobili da sada prodaju sve svoje igrače.</p>
+      <table id="board"></table>
+    </div>
+  </section>
 </main>
+<footer>Demo · virtualni krediti bez novčane vrijednosti · cijene se mijenjaju isključivo kupnjom i prodajom korisnika ove igre · imena igrača koriste se samo informativno.</footer>
 
-<footer>Demo igra · Virtualni krediti bez novčane vrijednosti · Sve vrijednosti su u milijunima virtualnih kredita (mil.) · Utakmice, događaji i vrijednosti igrača su simulirani i ne odražavaju stvarne događaje.</footer>
+<nav class="bottom">
+  <button data-tab="market" class="on"><span class="i">📈</span>Tržište</button>
+  <button data-tab="mine"><span class="i">⭐</span>Moji igrači</button>
+  <button data-tab="board"><span class="i">🏆</span>Ljestvica</button>
+</nav>
 
-<div class="modal hidden" id="modal">
-  <div class="mbox">
-    <div class="mhead">
-      <div class="av" id="mAv"></div>
-      <div><div class="nm" id="mName" style="font-size:18px"></div><div class="sub" id="mSub"></div></div>
-      <button class="x" id="mClose" aria-label="Zatvori">✕</button>
+<div class="sheet-bg hidden" id="sheetBg">
+  <div class="sheet" role="dialog" aria-modal="true">
+    <div class="grab"></div>
+    <div class="sh-head">
+      <div class="av" id="sAv"></div>
+      <div><div class="nm" id="sName"></div><div class="sub" id="sSub"></div></div>
+      <button class="close" id="sClose" aria-label="Zatvori">✕</button>
     </div>
-    <div class="big" id="mPrice"></div>
-    <div id="mChange" class="sub"></div>
-    <div class="tabs-range" id="range">
-      <button data-r="30">30 dana</button><button data-r="90" class="on">90 dana</button><button data-r="0">Uživo</button>
+    <div class="bigprice" id="sPrice"></div>
+    <div class="sub" id="sMeta"></div>
+    <div id="sChart" style="margin-top:10px"></div>
+    <div class="sub" id="sOwn" style="margin-top:8px"></div>
+    <div class="stepper">
+      <button id="minus" aria-label="Manje">−</button>
+      <input id="qty" type="number" inputmode="numeric" min="1" max="100" value="1">
+      <button id="plus" aria-label="Više">+</button>
+      <span class="sub">komada</span>
     </div>
-    <div id="chart" style="margin-top:8px"></div>
-    <div class="note">📊 Simulirani podaci – kretanje vrijednosti je generirano i ne predstavlja stvarne podatke.</div>
-    <div class="sub" id="mHold" style="margin-top:12px"></div>
-    <div class="trade">
-      <button class="btn buy" id="buyBtn">Kupi</button>
-      <button class="btn sell" id="sellBtn">Prodaj</button>
+    <div class="quick"><button data-q="1">1</button><button data-q="5">5</button><button data-q="10">10</button><button data-q="25">25</button><button data-q="all">Sve moje</button></div>
+    <div class="quote" id="quote"></div>
+    <div class="actions">
+      <button class="big buy" id="buyBtn">Kupi</button>
+      <button class="big sell" id="sellBtn">Prodaj</button>
     </div>
-    <div class="msg" id="msg"></div>
+    <div class="msg" id="sMsg"></div>
+    <h2 style="margin-top:14px;font-size:16px">Zadnje kupnje i prodaje</h2>
+    <ul class="trades" id="sTrades"></ul>
+  </div>
+</div>
+
+<div class="overlay hidden" id="nickOverlay">
+  <div class="card">
+    <h2>Dobro došao! ⚽</h2>
+    <p class="sub">Odaberi nadimak koji će se vidjeti na ljestvici. Ne trebaš e-mail ni lozinku.</p>
+    <input id="nickInput" maxlength="20" placeholder="npr. Robert_ZG" autocomplete="off">
+    <button class="big buy" id="nickBtn" style="width:100%">Kreni igrati</button>
+    <div class="msg down" id="nickMsg"></div>
+    <p class="sub">⚠️ Igra koristi samo virtualne kredite. Nema pravog novca.</p>
   </div>
 </div>
 
 <script>
 "use strict";
-const START = 100, TICK_MS = 4000, TICKS_PER_ROUND = 8, ROUNDS = 38;
-const KEY = "fantasy-manager-v2";
+/* ==================== POSTAVKE – ovdje upiši podatke Supabase projekta ==================== */
+const SUPABASE_URL = "https://rmbabftwbcqwjbvtrwso.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtYmFiZnR3YmNxd2pidnRyd3NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1NzM4MDAsImV4cCI6MjEwODE0OTgwMH0.VrqVuBrQJ2za5jQ718tFTc4Od7raHYT5FuroS0GLNXE";
+/* ========================================================================================= */
+
+const DEMO = /YOUR-/.test(SUPABASE_URL + SUPABASE_ANON_KEY) || new URLSearchParams(location.search).has("demo");
 const POSN = {GK:"Vratar", DEF:"Branič", MID:"Vezni", FWD:"Napadač"};
-const POSP = {GK:"Vratari", DEF:"Braniči", MID:"Vezni", FWD:"Napadači"};
-const PLAYERS = [
-  {id:"livakovic",name:"Dominik Livaković",club:"Dinamo Zagreb",pos:"GK",hr:1,p:5.0},
-  {id:"courtois",name:"Thibaut Courtois",club:"Real Madrid",pos:"GK",p:6.0},
-  {id:"alisson",name:"Alisson Becker",club:"Liverpool",pos:"GK",p:5.6},
-  {id:"donnarumma",name:"Gianluigi Donnarumma",club:"Manchester City",pos:"GK",p:5.3},
-  {id:"gvardiol",name:"Joško Gvardiol",club:"Manchester City",pos:"DEF",hr:1,p:7.2},
-  {id:"sutalo",name:"Josip Šutalo",club:"Ajax",pos:"DEF",hr:1,p:4.8},
-  {id:"vandijk",name:"Virgil van Dijk",club:"Liverpool",pos:"DEF",p:6.4},
-  {id:"saliba",name:"William Saliba",club:"Arsenal",pos:"DEF",p:6.6},
-  {id:"hakimi",name:"Achraf Hakimi",club:"Paris Saint-Germain",pos:"DEF",p:6.8},
-  {id:"dias",name:"Rúben Dias",club:"Manchester City",pos:"DEF",p:6.0},
-  {id:"modric",name:"Luka Modrić",club:"AC Milan",pos:"MID",hr:1,p:6.5},
-  {id:"kovacic",name:"Mateo Kovačić",club:"Manchester City",pos:"MID",hr:1,p:5.9},
-  {id:"sucic",name:"Luka Sučić",club:"Real Sociedad",pos:"MID",hr:1,p:5.5},
-  {id:"bellingham",name:"Jude Bellingham",club:"Real Madrid",pos:"MID",p:11.5},
-  {id:"pedri",name:"Pedri",club:"FC Barcelona",pos:"MID",p:9.0},
-  {id:"rodri",name:"Rodri",club:"Manchester City",pos:"MID",p:8.6},
-  {id:"musiala",name:"Jamal Musiala",club:"Bayern München",pos:"MID",p:10.2},
-  {id:"wirtz",name:"Florian Wirtz",club:"Liverpool",pos:"MID",p:10.4},
-  {id:"kramaric",name:"Andrej Kramarić",club:"Hoffenheim",pos:"FWD",hr:1,p:7.0},
-  {id:"livaja",name:"Marko Livaja",club:"Hajduk Split",pos:"FWD",hr:1,p:6.2},
-  {id:"mbappe",name:"Kylian Mbappé",club:"Real Madrid",pos:"FWD",p:14.5},
-  {id:"haaland",name:"Erling Haaland",club:"Manchester City",pos:"FWD",p:14.8},
-  {id:"kane",name:"Harry Kane",club:"Bayern München",pos:"FWD",p:12.6},
-  {id:"yamal",name:"Lamine Yamal",club:"FC Barcelona",pos:"FWD",p:12.9},
-  {id:"salah",name:"Mohamed Salah",club:"Liverpool",pos:"FWD",p:12.8},
-  {id:"vinicius",name:"Vinícius Júnior",club:"Real Madrid",pos:"FWD",p:12.2},
-  {id:"saka",name:"Bukayo Saka",club:"Arsenal",pos:"FWD",p:10.5},
-];
-const BOTS = ["Ivana K.","Marko_ST","Dinamo1911","Hajdukovac","Ana P.","Tomislav R.","Vatreni99","Petra M.","Bili_Split","Luka_ZG","Osijek_Fan","Nika V."];
-const fmt = n => n.toLocaleString("hr-HR",{minimumFractionDigits:2,maximumFractionDigits:2});
-const cr = n => fmt(n)+" mil.";
-const pct = n => (n>=0?"+":"")+fmt(n)+" %";
 const $ = id => document.getElementById(id);
+const fmt = (n,d=2) => Number(n).toLocaleString("hr-HR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const cr = n => "🪙 " + fmt(n);
+const pct = n => (n>0?"+":"") + fmt(n,1) + " %";
+const esc = s => String(s ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const initials = n => n.split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
 const colorFor = id => { let h=0; for(const c of id) h=(h*31+c.charCodeAt(0))%360; return `hsl(${h} 55% 40%)`; };
-const r2 = n => Math.round(n*100)/100;
-const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-function rnd(seed){ return ()=>{ seed=(seed*16807)%2147483647; return (seed-1)/2147483646; }; }
+const ago = ts => { const s=Math.max(0,(Date.now()-new Date(ts))/1000); if(s<60) return "upravo"; if(s<3600) return `prije ${Math.floor(s/60)} min`; if(s<86400) return `prije ${Math.floor(s/3600)} h`; return new Date(ts).toLocaleDateString("hr-HR"); };
+const curve = (base,k,s,n) => base*(n + k*((s+n)**2 - s**2)/2);
 
-function freshState(){
-  const val={}, open={}, hist={}, live={}, ppts={};
-  PLAYERS.forEach((pl,i)=>{
-    const r=rnd(1000+i*97); let v=pl.p; const arr=[pl.p];
-    for(let d=0; d<89; d++){ v=v/(1+(r()-0.5)*0.05); arr.unshift(r2(Math.max(1,v))); }
-    hist[pl.id]=arr; val[pl.id]=pl.p; open[pl.id]=pl.p; live[pl.id]=[pl.p]; ppts[pl.id]=0;
-  });
-  const bots=BOTS.map((n,i)=>({name:n,score:Math.round(rnd(50+i)()*40)}));
-  return {cash:START,owned:{},tx:[],val,open,hist,live,ppts,points:0,roundPts:0,round:1,tickInRound:0,season:"2026./27.",news:[],bots,history:[]};
-}
-let S;
-function load(){
-  try{ const raw=localStorage.getItem(KEY); if(raw){ S=JSON.parse(raw); if(S&&S.val&&PLAYERS.every(p=>S.val[p.id]!=null)) return; } }catch(e){}
-  S=freshState(); addNews("Dobro došli! Imaš 100 mil. virtualnih kredita. Kupi igrače i prodaj ih kad im vrijednost naraste.","info");
-}
-function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
-const byId = id => PLAYERS.find(p=>p.id===id);
-const chg = id => (S.val[id]/S.open[id]-1)*100;
-const ownedIds = () => Object.keys(S.owned);
-const ownedValue = () => ownedIds().reduce((s,id)=>s+S.val[id],0);
-const totalGain = () => S.cash+ownedValue()-START;
-const score = () => Math.round(S.points + totalGain()*10);
-function addNews(text,type){ S.news.unshift({t:Date.now(),text,type}); S.news=S.news.slice(0,50); }
+let SETTINGS = {sell_fee:0.02, max_per_trade:100, max_per_player:1000, start_credits:100000};
 
-const EVENTS = [
-  {txt:"⚽ Gol!",pts:5,m:[0.03,0.06],not:["GK"]},
-  {txt:"🎯 Asistencija!",pts:3,m:[0.02,0.04],not:["GK"]},
-  {txt:"⭐ Igrač utakmice!",pts:4,m:[0.04,0.07]},
-  {txt:"🧤 Sjajna obrana!",pts:3,m:[0.02,0.04],only:["GK"]},
-  {txt:"🛡️ Utakmica bez primljenog gola!",pts:4,m:[0.02,0.04],only:["GK","DEF"]},
-  {txt:"🟨 Žuti karton.",pts:-1,m:[-0.02,-0.01]},
-  {txt:"🟥 Crveni karton!",pts:-3,m:[-0.07,-0.04]},
-  {txt:"🩹 Lakša ozljeda na treningu.",pts:0,m:[-0.09,-0.05]},
-  {txt:"❌ Promašen jedanaesterac.",pts:-2,m:[-0.05,-0.03],not:["GK"]},
-  {txt:"📰 Glasine o transferu u veći klub.",pts:0,m:[0.03,0.05]},
-  {txt:"🔁 Ostao na klupi.",pts:0,m:[-0.04,-0.02]},
-];
-function pickEvent(pl){
-  const ok=EVENTS.filter(e=>(!e.only||e.only.includes(pl.pos))&&(!e.not||!e.not.includes(pl.pos)));
-  return ok[Math.floor(Math.random()*ok.length)];
+/* ==================== API: Supabase ==================== */
+function supaApi(){
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {auth:{persistSession:true, autoRefreshToken:true}});
+  let uid=null;
+  const chk = ({data,error}) => { if(error) throw new Error(error.message); return data; };
+  return {
+    async init(){
+      let { data:{ session } } = await sb.auth.getSession();
+      if(!session){ const r = await sb.auth.signInAnonymously(); if(r.error) throw new Error("Prijava nije uspjela: "+r.error.message+" (je li u Supabase uključena anonimna prijava?)"); session=r.data.session; }
+      uid = session.user.id;
+      const s = await sb.from("game_settings").select("*").maybeSingle(); if(s.data) SETTINGS=s.data;
+    },
+    async profile(){ return chk(await sb.from("profiles").select("*").eq("id",uid).maybeSingle()); },
+    async setNickname(n){ return chk(await sb.rpc("set_nickname",{p_nickname:n})); },
+    async market(){ return chk(await sb.from("market").select("*")); },
+    async holdings(){ return chk(await sb.from("holdings").select("*").eq("user_id",uid)); },
+    async buy(id,q){ return chk(await sb.rpc("buy_player",{p_player_id:id,p_qty:q})); },
+    async sell(id,q){ return chk(await sb.rpc("sell_player",{p_player_id:id,p_qty:q})); },
+    async history(id){ return chk(await sb.from("price_history").select("price,ts").eq("player_id",id).order("ts",{ascending:false}).limit(300)).reverse(); },
+    async trades(id){ return chk(await sb.from("trades").select("side,qty,total,price_after,created_at,user_id,profiles(nickname)").eq("player_id",id).order("created_at",{ascending:false}).limit(20)); },
+    async myTrades(){ return chk(await sb.from("trades").select("player_id,side,qty,total,created_at").eq("user_id",uid).order("created_at",{ascending:false}).limit(30)); },
+    async leaderboard(){ return chk(await sb.rpc("get_leaderboard",{p_limit:100})); },
+    subscribe(onPlayer,onTrade){
+      sb.channel("market")
+        .on("postgres_changes",{event:"UPDATE",schema:"public",table:"players"},p=>onPlayer(p.new))
+        .on("postgres_changes",{event:"INSERT",schema:"public",table:"trades"},p=>onTrade(p.new))
+        .subscribe();
+    },
+    get uid(){ return uid; }
+  };
 }
 
-function tick(){
-  const changed={};
-  PLAYERS.forEach(pl=>{ const o=S.val[pl.id]; const n=r2(Math.max(1,o*(1+(Math.random()-0.5)*0.01))); S.val[pl.id]=n; changed[pl.id]=n>=o?"up":"down"; });
-  const nEv = Math.random()<0.5 ? 1 : (Math.random()<0.3?2:0);
-  for(let k=0;k<nEv;k++){
-    const pl=PLAYERS[Math.floor(Math.random()*PLAYERS.length)], ev=pickEvent(pl);
-    const m=ev.m[0]+Math.random()*(ev.m[1]-ev.m[0]); S.val[pl.id]=r2(Math.max(1,S.val[pl.id]*(1+m)));
-    changed[pl.id]=m>=0?"up":"down"; S.ppts[pl.id]+=ev.pts;
-    const mine=!!S.owned[pl.id];
-    if(mine){ S.points+=ev.pts; S.roundPts+=ev.pts; }
-    const ptxt = ev.pts ? ` · ${ev.pts>0?"+":""}${ev.pts} bod.` : "";
-    addNews(`${ev.txt} ${pl.name} (${pl.club}) – vrijednost ${pct(m*100)}${ptxt}${mine?" · <b>tvoj igrač</b>":""}`, m>=0?"up":"down");
-  }
-  PLAYERS.forEach(pl=>{ const L=S.live[pl.id]; L.push(S.val[pl.id]); if(L.length>150) L.shift(); });
-  S.tickInRound++;
-  if(S.tickInRound>=TICKS_PER_ROUND) endRound();
-  save(); render(changed);
-}
-function endRound(){
-  addNews(`🏁 Kolo ${S.round}. je završeno. Tvoji bodovi u kolu: ${S.roundPts}.`,"info");
-  S.history.unshift({round:S.round,pts:S.roundPts});
-  S.bots.forEach(b=>{ b.score+=Math.round(Math.random()*16-2); });
-  PLAYERS.forEach(pl=>{ const h=S.hist[pl.id]; h.push(S.val[pl.id]); if(h.length>200) h.shift(); S.open[pl.id]=S.val[pl.id]; });
-  S.tickInRound=0; S.roundPts=0; S.round++;
-  if(S.round>ROUNDS){
-    addNews(`🏆 Sezona ${S.season} je završena! Tvoj konačni rezultat: ${score()}. Počinje nova sezona.`,"info");
-    S.round=1; S.season="2027./28.";
-  }
+/* ==================== API: lokalni demo (bez poslužitelja) ==================== */
+function demoApi(){
+  const SEED = [{"id":"kylian-mbappe","name":"Kylian Mbappé","club":"Real Madrid","position":"FWD","nationality":"FRA","tier":"zvijezda","base_price":2400.0,"k":0.004},{"id":"erling-haaland","name":"Erling Haaland","club":"Manchester City","position":"FWD","nationality":"NOR","tier":"zvijezda","base_price":2300.0,"k":0.004},{"id":"lamine-yamal","name":"Lamine Yamal","club":"FC Barcelona","position":"FWD","nationality":"ESP","tier":"zvijezda","base_price":2400.0,"k":0.004},{"id":"jude-bellingham","name":"Jude Bellingham","club":"Real Madrid","position":"MID","nationality":"ENG","tier":"zvijezda","base_price":2100.0,"k":0.004},{"id":"vinicius-junior","name":"Vinícius Júnior","club":"Real Madrid","position":"FWD","nationality":"BRA","tier":"zvijezda","base_price":2000.0,"k":0.004},{"id":"mohamed-salah","name":"Mohamed Salah","club":"Liverpool","position":"FWD","nationality":"EGY","tier":"zvijezda","base_price":1700.0,"k":0.004},{"id":"harry-kane","name":"Harry Kane","club":"Bayern München","position":"FWD","nationality":"ENG","tier":"zvijezda","base_price":1800.0,"k":0.004},{"id":"jamal-musiala","name":"Jamal Musiala","club":"Bayern München","position":"MID","nationality":"GER","tier":"zvijezda","base_price":1900.0,"k":0.004},{"id":"bukayo-saka","name":"Bukayo Saka","club":"Arsenal","position":"FWD","nationality":"ENG","tier":"zvijezda","base_price":1800.0,"k":0.004},{"id":"pedri","name":"Pedri","club":"FC Barcelona","position":"MID","nationality":"ESP","tier":"zvijezda","base_price":1800.0,"k":0.004},{"id":"rodri","name":"Rodri","club":"Manchester City","position":"MID","nationality":"ESP","tier":"zvijezda","base_price":1600.0,"k":0.004},{"id":"florian-wirtz","name":"Florian Wirtz","club":"Liverpool","position":"MID","nationality":"GER","tier":"zvijezda","base_price":1900.0,"k":0.004},{"id":"raphinha","name":"Raphinha","club":"FC Barcelona","position":"FWD","nationality":"BRA","tier":"zvijezda","base_price":1500.0,"k":0.004},{"id":"lautaro-martinez","name":"Lautaro Martínez","club":"Inter","position":"FWD","nationality":"ARG","tier":"zvijezda","base_price":1400.0,"k":0.004},{"id":"declan-rice","name":"Declan Rice","club":"Arsenal","position":"MID","nationality":"ENG","tier":"zvijezda","base_price":1500.0,"k":0.004},{"id":"cole-palmer","name":"Cole Palmer","club":"Chelsea","position":"MID","nationality":"ENG","tier":"zvijezda","base_price":1700.0,"k":0.004},{"id":"ousmane-dembele","name":"Ousmane Dembélé","club":"Paris Saint-Germain","position":"FWD","nationality":"FRA","tier":"zvijezda","base_price":1700.0,"k":0.004},{"id":"vitinha","name":"Vitinha","club":"Paris Saint-Germain","position":"MID","nationality":"POR","tier":"zvijezda","base_price":1400.0,"k":0.004},{"id":"federico-valverde","name":"Federico Valverde","club":"Real Madrid","position":"MID","nationality":"URU","tier":"zvijezda","base_price":1400.0,"k":0.004},{"id":"bruno-fernandes","name":"Bruno Fernandes","club":"Manchester United","position":"MID","nationality":"POR","tier":"zvijezda","base_price":1200.0,"k":0.004},{"id":"martin-odegaard","name":"Martin Ødegaard","club":"Arsenal","position":"MID","nationality":"NOR","tier":"zvijezda","base_price":1300.0,"k":0.004},{"id":"phil-foden","name":"Phil Foden","club":"Manchester City","position":"MID","nationality":"ENG","tier":"zvijezda","base_price":1300.0,"k":0.004},{"id":"alexander-isak","name":"Alexander Isak","club":"Liverpool","position":"FWD","nationality":"SWE","tier":"zvijezda","base_price":1600.0,"k":0.004},{"id":"victor-osimhen","name":"Victor Osimhen","club":"Galatasaray","position":"FWD","nationality":"NGA","tier":"zvijezda","base_price":1100.0,"k":0.004},{"id":"khvicha-kvaratskhelia","name":"Khvicha Kvaratskhelia","club":"Paris Saint-Germain","position":"FWD","nationality":"GEO","tier":"zvijezda","base_price":1500.0,"k":0.004},{"id":"virgil-van-dijk","name":"Virgil van Dijk","club":"Liverpool","position":"DEF","nationality":"NED","tier":"zvijezda","base_price":1000.0,"k":0.004},{"id":"william-saliba","name":"William Saliba","club":"Arsenal","position":"DEF","nationality":"FRA","tier":"zvijezda","base_price":1100.0,"k":0.004},{"id":"achraf-hakimi","name":"Achraf Hakimi","club":"Paris Saint-Germain","position":"DEF","nationality":"MAR","tier":"zvijezda","base_price":1200.0,"k":0.004},{"id":"thibaut-courtois","name":"Thibaut Courtois","club":"Real Madrid","position":"GK","nationality":"BEL","tier":"zvijezda","base_price":900.0,"k":0.004},{"id":"alisson-becker","name":"Alisson Becker","club":"Liverpool","position":"GK","nationality":"BRA","tier":"zvijezda","base_price":800.0,"k":0.004},{"id":"gianluigi-donnarumma","name":"Gianluigi Donnarumma","club":"Manchester City","position":"GK","nationality":"ITA","tier":"zvijezda","base_price":850.0,"k":0.004},{"id":"lionel-messi","name":"Lionel Messi","club":"Inter Miami","position":"FWD","nationality":"ARG","tier":"zvijezda","base_price":1200.0,"k":0.004},{"id":"cristiano-ronaldo","name":"Cristiano Ronaldo","club":"Al-Nassr","position":"FWD","nationality":"POR","tier":"zvijezda","base_price":1000.0,"k":0.004},{"id":"pau-cubarsi","name":"Pau Cubarsí","club":"FC Barcelona","position":"DEF","nationality":"ESP","tier":"zvijezda","base_price":900.0,"k":0.004},{"id":"dominik-livakovic","name":"Dominik Livaković","club":"Dinamo Zagreb","position":"GK","nationality":"CRO","tier":"reprezentacija","base_price":300.0,"k":0.01},{"id":"dominik-kotarski","name":"Dominik Kotarski","club":"FC København","position":"GK","nationality":"CRO","tier":"reprezentacija","base_price":150.0,"k":0.02},{"id":"josko-gvardiol","name":"Joško Gvardiol","club":"Manchester City","position":"DEF","nationality":"CRO","tier":"reprezentacija","base_price":1300.0,"k":0.004},{"id":"josip-sutalo","name":"Josip Šutalo","club":"Ajax","position":"DEF","nationality":"CRO","tier":"reprezentacija","base_price":350.0,"k":0.01},{"id":"duje-caleta-car","name":"Duje Ćaleta-Car","club":"Real Sociedad","position":"DEF","nationality":"CRO","tier":"reprezentacija","base_price":250.0,"k":0.01},{"id":"josip-stanisic","name":"Josip Stanišić","club":"Bayern München","position":"DEF","nationality":"CRO","tier":"reprezentacija","base_price":450.0,"k":0.01},{"id":"borna-sosa","name":"Borna Sosa","club":"Torino","position":"DEF","nationality":"CRO","tier":"reprezentacija","base_price":200.0,"k":0.01},{"id":"marin-pongracic","name":"Marin Pongračić","club":"Fiorentina","position":"DEF","nationality":"CRO","tier":"reprezentacija","base_price":250.0,"k":0.01},{"id":"luka-vuskovic","name":"Luka Vušković","club":"Hamburger SV","position":"DEF","nationality":"CRO","tier":"reprezentacija","base_price":400.0,"k":0.01},{"id":"kristijan-jakic","name":"Kristijan Jakić","club":"Augsburg","position":"MID","nationality":"CRO","tier":"reprezentacija","base_price":180.0,"k":0.02},{"id":"luka-modric","name":"Luka Modrić","club":"AC Milan","position":"MID","nationality":"CRO","tier":"reprezentacija","base_price":700.0,"k":0.01},{"id":"mateo-kovacic","name":"Mateo Kovačić","club":"Manchester City","position":"MID","nationality":"CRO","tier":"reprezentacija","base_price":600.0,"k":0.01},{"id":"luka-sucic","name":"Luka Sučić","club":"Real Sociedad","position":"MID","nationality":"CRO","tier":"reprezentacija","base_price":450.0,"k":0.01},{"id":"petar-sucic","name":"Petar Sučić","club":"Inter","position":"MID","nationality":"CRO","tier":"reprezentacija","base_price":400.0,"k":0.01},{"id":"martin-baturina","name":"Martin Baturina","club":"Como","position":"MID","nationality":"CRO","tier":"reprezentacija","base_price":500.0,"k":0.01},{"id":"mario-pasalic","name":"Mario Pašalić","club":"Atalanta","position":"MID","nationality":"CRO","tier":"reprezentacija","base_price":400.0,"k":0.01},{"id":"lovro-majer","name":"Lovro Majer","club":"Wolfsburg","position":"MID","nationality":"CRO","tier":"reprezentacija","base_price":300.0,"k":0.01},{"id":"nikola-vlasic","name":"Nikola Vlašić","club":"Torino","position":"MID","nationality":"CRO","tier":"reprezentacija","base_price":300.0,"k":0.01},{"id":"andrej-kramaric","name":"Andrej Kramarić","club":"Hoffenheim","position":"FWD","nationality":"CRO","tier":"reprezentacija","base_price":400.0,"k":0.01},{"id":"ivan-perisic","name":"Ivan Perišić","club":"PSV","position":"FWD","nationality":"CRO","tier":"reprezentacija","base_price":300.0,"k":0.01},{"id":"ante-budimir","name":"Ante Budimir","club":"Osasuna","position":"FWD","nationality":"CRO","tier":"reprezentacija","base_price":350.0,"k":0.01},{"id":"franjo-ivanovic","name":"Franjo Ivanović","club":"Benfica","position":"FWD","nationality":"CRO","tier":"reprezentacija","base_price":350.0,"k":0.01},{"id":"igor-matanovic","name":"Igor Matanović","club":"Freiburg","position":"FWD","nationality":"CRO","tier":"reprezentacija","base_price":250.0,"k":0.01},{"id":"petar-musa","name":"Petar Musa","club":"FC Dallas","position":"FWD","nationality":"CRO","tier":"reprezentacija","base_price":200.0,"k":0.02},{"id":"marco-pasalic","name":"Marco Pašalić","club":"Orlando City","position":"FWD","nationality":"CRO","tier":"reprezentacija","base_price":200.0,"k":0.02},{"id":"marko-livaja","name":"Marko Livaja","club":"Hajduk Split","position":"FWD","nationality":"CRO","tier":"HNL","base_price":250.0,"k":0.02},{"id":"michele-sego","name":"Michele Šego","club":"Hajduk Split","position":"FWD","nationality":"CRO","tier":"HNL","base_price":120.0,"k":0.02},{"id":"filip-krovinovic","name":"Filip Krovinović","club":"Hajduk Split","position":"MID","nationality":"CRO","tier":"HNL","base_price":120.0,"k":0.02},{"id":"rokas-pukstas","name":"Rokas Pukštas","club":"Hajduk Split","position":"MID","nationality":"LTU","tier":"HNL","base_price":150.0,"k":0.02},{"id":"ivan-lucic","name":"Ivan Lučić","club":"Hajduk Split","position":"GK","nationality":"CRO","tier":"HNL","base_price":80.0,"k":0.02},{"id":"dario-melnjak","name":"Dario Melnjak","club":"Hajduk Split","position":"DEF","nationality":"CRO","tier":"HNL","base_price":80.0,"k":0.02},{"id":"ivan-nevistic","name":"Ivan Nevistić","club":"Dinamo Zagreb","position":"GK","nationality":"CRO","tier":"HNL","base_price":100.0,"k":0.02},{"id":"josip-misic","name":"Josip Mišić","club":"Dinamo Zagreb","position":"MID","nationality":"CRO","tier":"HNL","base_price":120.0,"k":0.02},{"id":"luka-stojkovic","name":"Luka Stojković","club":"Dinamo Zagreb","position":"MID","nationality":"CRO","tier":"HNL","base_price":100.0,"k":0.02},{"id":"sandro-kulenovic","name":"Sandro Kulenović","club":"Dinamo Zagreb","position":"FWD","nationality":"CRO","tier":"HNL","base_price":130.0,"k":0.02},{"id":"dion-drena-beljo","name":"Dion Drena Beljo","club":"Dinamo Zagreb","position":"FWD","nationality":"CRO","tier":"HNL","base_price":140.0,"k":0.02},{"id":"gabriel-vidovic","name":"Gabriel Vidović","club":"Dinamo Zagreb","position":"MID","nationality":"CRO","tier":"HNL","base_price":150.0,"k":0.02},{"id":"monsef-bakrar","name":"Monsef Bakrar","club":"Dinamo Zagreb","position":"FWD","nationality":"ALG","tier":"HNL","base_price":120.0,"k":0.02},{"id":"toni-fruk","name":"Toni Fruk","club":"Rijeka","position":"MID","nationality":"CRO","tier":"HNL","base_price":150.0,"k":0.02},{"id":"niko-jankovic","name":"Niko Janković","club":"Rijeka","position":"MID","nationality":"CRO","tier":"HNL","base_price":100.0,"k":0.02},{"id":"martin-zlomislic","name":"Martin Zlomislić","club":"Rijeka","position":"GK","nationality":"CRO","tier":"HNL","base_price":60.0,"k":0.03},{"id":"dejan-petrovic","name":"Dejan Petrovič","club":"Rijeka","position":"MID","nationality":"SVN","tier":"HNL","base_price":80.0,"k":0.03},{"id":"ante-majstorovic","name":"Ante Majstorović","club":"Rijeka","position":"DEF","nationality":"CRO","tier":"HNL","base_price":70.0,"k":0.03},{"id":"marko-malenica","name":"Marko Malenica","club":"Osijek","position":"GK","nationality":"CRO","tier":"HNL","base_price":70.0,"k":0.03},{"id":"ramon-mierez","name":"Ramón Miérez","club":"Osijek","position":"FWD","nationality":"ARG","tier":"HNL","base_price":90.0,"k":0.03},{"id":"vedran-jugovic","name":"Vedran Jugović","club":"Osijek","position":"MID","nationality":"CRO","tier":"HNL","base_price":60.0,"k":0.03},{"id":"estevao","name":"Estêvão","club":"Chelsea","position":"FWD","nationality":"BRA","tier":"talent","base_price":80.0,"k":0.05},{"id":"franco-mastantuono","name":"Franco Mastantuono","club":"Real Madrid","position":"MID","nationality":"ARG","tier":"talent","base_price":70.0,"k":0.05},{"id":"endrick","name":"Endrick","club":"Real Madrid","position":"FWD","nationality":"BRA","tier":"talent","base_price":70.0,"k":0.05},{"id":"desire-doue","name":"Désiré Doué","club":"Paris Saint-Germain","position":"FWD","nationality":"FRA","tier":"talent","base_price":300.0,"k":0.02},{"id":"arda-guler","name":"Arda Güler","club":"Real Madrid","position":"MID","nationality":"TUR","tier":"talent","base_price":300.0,"k":0.02},{"id":"kobbie-mainoo","name":"Kobbie Mainoo","club":"Manchester United","position":"MID","nationality":"ENG","tier":"talent","base_price":200.0,"k":0.02},{"id":"warren-zaire-emery","name":"Warren Zaïre-Emery","club":"Paris Saint-Germain","position":"MID","nationality":"FRA","tier":"talent","base_price":200.0,"k":0.02},{"id":"rodrigo-mora","name":"Rodrigo Mora","club":"FC Porto","position":"MID","nationality":"POR","tier":"talent","base_price":60.0,"k":0.05},{"id":"kenan-yildiz","name":"Kenan Yıldız","club":"Juventus","position":"FWD","nationality":"TUR","tier":"talent","base_price":300.0,"k":0.02},{"id":"nico-paz","name":"Nico Paz","club":"Como","position":"MID","nationality":"ARG","tier":"talent","base_price":100.0,"k":0.04},{"id":"ethan-nwaneri","name":"Ethan Nwaneri","club":"Arsenal","position":"MID","nationality":"ENG","tier":"talent","base_price":60.0,"k":0.05},{"id":"myles-lewis-skelly","name":"Myles Lewis-Skelly","club":"Arsenal","position":"DEF","nationality":"ENG","tier":"talent","base_price":60.0,"k":0.05},{"id":"lennart-karl","name":"Lennart Karl","club":"Bayern München","position":"MID","nationality":"GER","tier":"talent","base_price":40.0,"k":0.05},{"id":"assan-ouedraogo","name":"Assan Ouédraogo","club":"RB Leipzig","position":"MID","nationality":"GER","tier":"talent","base_price":40.0,"k":0.05},{"id":"jorrel-hato","name":"Jorrel Hato","club":"Chelsea","position":"DEF","nationality":"NED","tier":"talent","base_price":70.0,"k":0.05},{"id":"dean-huijsen","name":"Dean Huijsen","club":"Real Madrid","position":"DEF","nationality":"ESP","tier":"talent","base_price":250.0,"k":0.02},{"id":"geovany-quenda","name":"Geovany Quenda","club":"Sporting CP","position":"FWD","nationality":"POR","tier":"talent","base_price":50.0,"k":0.05},{"id":"chido-obi","name":"Chido Obi","club":"Manchester United","position":"FWD","nationality":"DEN","tier":"talent","base_price":30.0,"k":0.05},{"id":"branimir-mlacic","name":"Branimir Mlačić","club":"Udinese","position":"DEF","nationality":"CRO","tier":"talent","base_price":30.0,"k":0.05},{"id":"fran-topic","name":"Fran Topić","club":"Dinamo Zagreb","position":"MID","nationality":"CRO","tier":"talent","base_price":30.0,"k":0.05}];
+  const KEY="burza-demo-v1"; const uid="demo-user";
+  let D = JSON.parse(localStorage.getItem(KEY)||"null");
+  if(!D){ D={profile:null, shares:{}, owners:{}, holdings:{}, trades:[], hist:{}}; }
+  const save=()=>localStorage.setItem(KEY,JSON.stringify(D));
+  const P = id => { const s=SEED.find(x=>x.id===id); const sh=D.shares[id]||0; return {...s, shares_outstanding:sh, holders_count:D.owners[id]||0, price:Math.round(s.base_price*(1+s.k*sh)*100)/100}; };
+  const hist = id => D.hist[id] || (D.hist[id]=[{price:P(id).price, ts:new Date(Date.now()-86400000*2).toISOString()}]);
+  return {
+    async init(){}, get uid(){return uid;},
+    async profile(){ return D.profile; },
+    async setNickname(n){ n=n.trim(); if(n.length<3||n.length>20) throw new Error("Nadimak mora imati 3 do 20 znakova."); D.profile={id:uid,nickname:n,credits:D.profile?.credits ?? 100000}; save(); return D.profile; },
+    async market(){ return SEED.map(s=>{ const p=P(s.id); const h=hist(s.id); const old=h.filter(x=>new Date(x.ts)<=Date.now()-86400000).pop()||h[0]; return {...p, price_24h:old.price}; }); },
+    async holdings(){ return Object.entries(D.holdings).map(([player_id,h])=>({player_id,...h})); },
+    async buy(id,q){
+      const p=P(id); if(q<1||q>100) throw new Error("Količina mora biti od 1 do 100.");
+      const cost=Math.round(curve(p.base_price,p.k,p.shares_outstanding,q)*100)/100;
+      if(cost>D.profile.credits) throw new Error(`Nemaš dovoljno kredita (treba ${fmt(cost)}).`);
+      const h=D.holdings[id]; if(!h) D.owners[id]=(D.owners[id]||0)+1;
+      D.holdings[id] = h ? {qty:h.qty+q, avg_cost:(h.avg_cost*h.qty+cost)/(h.qty+q)} : {qty:q, avg_cost:cost/q};
+      D.profile.credits=Math.round((D.profile.credits-cost)*100)/100; D.shares[id]=p.shares_outstanding+q;
+      const after=P(id).price; hist(id).push({price:after,ts:new Date().toISOString()});
+      D.trades.unshift({player_id:id,side:"buy",qty:q,total:cost,price_after:after,created_at:new Date().toISOString(),user_id:uid}); save();
+      return {total:cost, price_after:after};
+    },
+    async sell(id,q){
+      const p=P(id), h=D.holdings[id]; if(!h||h.qty<q) throw new Error("Nemaš toliko komada ovog igrača.");
+      const net=Math.round(curve(p.base_price,p.k,p.shares_outstanding-q,q)*(1-SETTINGS.sell_fee)*100)/100;
+      const profit=net-h.avg_cost*q;
+      if(h.qty===q){ delete D.holdings[id]; D.owners[id]--; } else h.qty-=q;
+      D.profile.credits=Math.round((D.profile.credits+net)*100)/100; D.shares[id]=p.shares_outstanding-q;
+      const after=P(id).price; hist(id).push({price:after,ts:new Date().toISOString()});
+      D.trades.unshift({player_id:id,side:"sell",qty:q,total:net,price_after:after,created_at:new Date().toISOString(),user_id:uid}); save();
+      return {total:net, profit, price_after:after};
+    },
+    async history(id){ return hist(id); },
+    async trades(id){ return D.trades.filter(t=>t.player_id===id).slice(0,20).map(t=>({...t,profiles:{nickname:D.profile.nickname}})); },
+    async myTrades(){ return D.trades.slice(0,30); },
+    async leaderboard(){ const hv=Object.entries(D.holdings).reduce((s,[id,h])=>{const p=P(id);return s+curve(p.base_price,p.k,p.shares_outstanding-h.qty,h.qty)*(1-SETTINGS.sell_fee);},0); return [{rank:1,nickname:D.profile.nickname,credits:D.profile.credits,holdings_value:hv,total:D.profile.credits+hv,is_me:true}]; },
+    subscribe(){}
+  };
 }
 
-let tab="trziste", current=null, range=90;
+/* ==================== Stanje i prikaz ==================== */
+const api = DEMO ? demoApi() : supaApi();
+let PL = {}, HOLD = {}, ME = null, tab="market", filt="", cur=null, flash={};
 
-function renderRound(){
-  const p=Math.round(S.tickInRound/TICKS_PER_ROUND*100);
-  $("roundBox").innerHTML=`<b>Sezona ${S.season}</b><span>Kolo ${S.round}./${ROUNDS}</span><div class="bar"><i style="width:${p}%"></i></div><span class="sub">tvoji bodovi u kolu: <b>${S.roundPts}</b></span><button class="btn ghost" id="nextRound" style="padding:5px 10px">Odigraj kolo ⏭</button>`;
-  $("nextRound").onclick=()=>{ while(S.tickInRound<TICKS_PER_ROUND-1) tick(); tick(); };
-}
-function renderList(changed={}){
-  const q=$("q").value.trim().toLowerCase(), s=$("sort").value, f=$("filt").value;
-  let arr=PLAYERS.filter(p=>(!q||(p.name+" "+p.club+" "+POSN[p.pos]).toLowerCase().includes(q)) && (!f||(f==="hr"?p.hr:p.pos===f)));
-  arr.sort((a,b)=> s==="price"?S.val[b.id]-S.val[a.id] : s==="change"?chg(b.id)-chg(a.id) : s==="own"?((S.owned[b.id]?1:0)-(S.owned[a.id]?1:0))||S.val[b.id]-S.val[a.id] : s==="pts"?S.ppts[b.id]-S.ppts[a.id] : a.name.localeCompare(b.name,"hr"));
-  $("list").innerHTML = arr.length ? arr.map(p=>{
-    const c=chg(p.id), fl=changed[p.id]?"flash-"+changed[p.id]:"";
-    const o=S.owned[p.id], g=o?S.val[p.id]-o.buy:0;
-    const btn = o ? `<button class="rowbtn sell" data-act="sell" data-id="${p.id}">Prodaj</button>`
-                  : `<button class="rowbtn buy" data-act="buy" data-id="${p.id}" ${S.val[p.id]>S.cash?"disabled title=\"Nemaš dovoljno kredita\"":""}>Kupi</button>`;
-    return `<div class="row ${fl}" data-id="${p.id}">
-      <div class="av" style="background:${colorFor(p.id)}">${initials(p.name)}</div>
-      <div><div class="nm">${p.name}${p.hr?' <span title="Hrvatska">🇭🇷</span>':""}${o?' <span class="tag">moj igrač</span>':""}</div><div class="sub"><span class="pos-pill pos-${p.pos}">${POSN[p.pos]}</span>${p.club} · ${S.ppts[p.id]} bod.</div>${o?`<div class="gain ${g>=0?"up":"down"}">Kupljen za ${cr(o.buy)} · ${g>=0?"zarada":"gubitak"} ${cr(Math.abs(g))}</div>`:""}</div>
-      <div class="pr">${cr(S.val[p.id])}</div>
-      <div class="ch ${c>=0?"up":"down"}">${pct(c)}</div>
-      ${btn}</div>`;
-  }).join("") : `<p class="sub">Nema rezultata.</p>`;
-}
+function owned(id){ return HOLD[id]?.qty||0; }
+function liq(id,q){ const p=PL[id]; if(!p||!q) return 0; return curve(p.base_price,p.k,p.shares_outstanding-q,q)*(1-SETTINGS.sell_fee); }
+function holdingsValue(){ return Object.entries(HOLD).reduce((s,[id,h])=>s+liq(id,h.qty),0); }
+function chg(p){ return p.price_24h>0 ? (p.price/p.price_24h-1)*100 : 0; }
+function isCro(p){ return p.nationality==="CRO"; }
+function toast(t){ document.querySelectorAll(".toast").forEach(x=>x.remove()); const d=document.createElement("div"); d.className="toast"; d.innerHTML=t; document.body.appendChild(d); setTimeout(()=>d.remove(),3000); }
+
 function renderHeader(){
-  const tg=totalGain(); $("hCash").textContent=cr(S.cash); $("hPort").textContent=cr(ownedValue()); $("hGain").textContent=(tg>=0?"+":"")+cr(tg); $("hGain").className=tg>=0?"up":"down"; $("hPts").textContent=S.points; $("hScore").textContent=score();
+  $("nickLbl").textContent = ME ? ME.nickname : "";
+  $("hCredits").textContent = ME ? cr(ME.credits) : "–";
 }
-function renderNews(){
-  $("news").innerHTML=S.news.map(n=>`<li><div class="t">${new Date(n.t).toLocaleTimeString("hr-HR")} · simulirano</div><span class="${n.type==="up"?"up":n.type==="down"?"down":""}">${n.text}</span></li>`).join("");
+function renderList(){
+  const q=$("q").value.trim().toLowerCase(), s=$("sort").value;
+  let arr=Object.values(PL).filter(p=>(!q||(p.name+" "+p.club).toLowerCase().includes(q)) &&
+    (!filt || (filt==="cro"?isCro(p): filt==="mine"?owned(p.id)>0 : p.tier===filt)));
+  const by={price:(a,b)=>b.price-a.price, cheap:(a,b)=>a.price-b.price, chg:(a,b)=>chg(b)-chg(a), drop:(a,b)=>chg(a)-chg(b), owners:(a,b)=>b.holders_count-a.holders_count, name:(a,b)=>a.name.localeCompare(b.name,"hr")};
+  arr.sort(by[s]);
+  $("list").innerHTML = arr.length ? arr.map(p=>{
+    const c=chg(p), o=owned(p.id);
+    return `<div class="row ${flash[p.id]?"flash":""}" data-id="${p.id}">
+      <div class="av" style="background:${colorFor(p.id)}">${initials(p.name)}</div>
+      <div><div class="nm">${esc(p.name)}${isCro(p)?" 🇭🇷":""}${p.tier==="talent"?' <span class="tag">talent</span>':""}</div>
+        <div class="sub">${esc(p.club)} · ${POSN[p.position]}</div></div>
+      <div class="right"><div class="price">${cr(p.price)}</div><div class="ch ${c>0?"up":c<0?"down":"flat"}">${pct(c)} · 24 h</div></div>
+      <div class="btns"><div class="info">👥 ${p.holders_count} vlasnika${o?` · <span class="tag mine">imaš ${o}</span>`:""}</div>
+        ${o?`<button class="big sell" data-act="sell" data-id="${p.id}">Prodaj</button>`:""}
+        <button class="big buy" data-act="buy" data-id="${p.id}">Kupi</button></div>
+    </div>`;
+  }).join("") : `<p class="sub">Nema igrača za taj odabir.</p>`;
+  flash={};
 }
-function renderSquad(){
-  const ids=ownedIds(), ov=ownedValue();
-  let cost=0; ids.forEach(id=>cost+=S.owned[id].buy);
-  const open=ov-cost, tg=totalGain(), realized=tg-open;
-  $("pStats").innerHTML=`
-    <div class="stat"><div class="sub">Slobodni krediti</div><b>${cr(S.cash)}</b></div>
-    <div class="stat"><div class="sub">Vrijednost mojih igrača</div><b>${cr(ov)}</b></div>
-    <div class="stat"><div class="sub">Zarada na igračima koje imam</div><b class="${open>=0?"up":"down"}">${cr(open)}</b></div>
-    <div class="stat"><div class="sub">Zarada od prodanih igrača</div><b class="${realized>=0?"up":"down"}">${cr(realized)}</b></div>
-    <div class="stat"><div class="sub">Ukupna zarada</div><b class="${tg>=0?"up":"down"}">${cr(tg)}</b></div>
-    <div class="stat"><div class="sub">Bodovi · Rezultat</div><b>${S.points} · ${score()}</b></div>`;
-  $("pTable").innerHTML = ids.length ? `<tr><th>Igrač</th><th>Kupljen za</th><th>Vrijednost sada</th><th>Zarada</th><th>Bodovi</th><th></th></tr>`+
-    ids.map(id=>{const h=S.owned[id],v=S.val[id],d=v-h.buy;
-      return `<tr data-id="${id}" style="cursor:pointer"><td>${byId(id).name}<br><small class="sub">${POSN[byId(id).pos]} · ${byId(id).club}</small></td><td>${cr(h.buy)}</td><td>${cr(v)}</td><td class="${d>=0?"up":"down"}">${cr(d)}<br><small>${pct(d/h.buy*100)}</small></td><td>${S.ppts[id]}</td><td><button class="rowbtn sell" data-act="sell" data-id="${id}">Prodaj</button></td></tr>`;}).join("")
-    : `<tr><td class="sub" style="text-align:left">Još nemaš nijednog igrača. Otvori karticu „Igrači” i klikni zeleni gumb Kupi.</td></tr>`;
-  $("txTable").innerHTML = S.tx.length ? `<tr><th>Vrijeme</th><th>Vrsta</th><th>Igrač</th><th>Iznos</th><th>Zarada</th><th>Kolo</th></tr>`+
-    S.tx.slice(0,30).map(t=>`<tr><td>${new Date(t.t).toLocaleString("hr-HR")}</td><td class="${t.type==="buy"?"up":"down"}">${t.type==="buy"?"Kupnja":"Prodaja"}</td><td>${byId(t.id).name}</td><td>${cr(t.price)}</td><td class="${(t.gain||0)>=0?"up":"down"}">${t.type==="sell"?cr(t.gain):"–"}</td><td>${t.round}.</td></tr>`).join("")
-    : `<tr><td class="sub" style="text-align:left">Još nema kupnji ni prodaja.</td></tr>`;
+async function renderMine(){
+  const ids=Object.keys(HOLD); let cost=0, val=0;
+  ids.forEach(id=>{ cost+=HOLD[id].qty*HOLD[id].avg_cost; val+=liq(id,HOLD[id].qty); });
+  const pl=val-cost, total=(ME?.credits||0)+val, totalG=total-SETTINGS.start_credits;
+  $("mStats").innerHTML=`
+    <div class="stat"><div class="sub">Slobodni krediti</div><b>${cr(ME?.credits||0)}</b></div>
+    <div class="stat"><div class="sub">Vrijednost mojih igrača (ako sve prodam)</div><b>${cr(val)}</b></div>
+    <div class="stat"><div class="sub">Dobit/gubitak (igrači koje imam)</div><b class="${pl>=0?"up":"down"}">${pl>=0?"+":""}${fmt(pl)}</b></div>
+    <div class="stat"><div class="sub">Ukupno od početka</div><b class="${totalG>=0?"up":"down"}">${totalG>=0?"+":""}${fmt(totalG)}</b></div>`;
+  $("mList").innerHTML = ids.length ? ids.sort((a,b)=>liq(b,HOLD[b].qty)-liq(a,HOLD[a].qty)).map(id=>{
+    const p=PL[id], h=HOLD[id], v=liq(id,h.qty), g=v-h.qty*h.avg_cost;
+    return `<div class="row" data-id="${id}">
+      <div class="av" style="background:${colorFor(id)}">${initials(p.name)}</div>
+      <div><div class="nm">${esc(p.name)}</div><div class="sub">${h.qty} kom. · kupljeno po ${fmt(h.avg_cost)}</div></div>
+      <div class="right"><div class="price">${cr(v)}</div><div class="ch ${g>=0?"up":"down"}">${g>=0?"+":""}${fmt(g)} (${pct(h.avg_cost? g/(h.qty*h.avg_cost)*100:0)})</div></div>
+      <div class="btns"><div class="info">Cijena ${cr(p.price)} · iznos = ako sve prodaš</div><button class="big sell" data-act="sell" data-id="${id}">Prodaj</button><button class="big buy" data-act="buy" data-id="${id}">Kupi još</button></div>
+    </div>`; }).join("")
+    : `<p class="sub">Još nemaš nijednog igrača. Idi na <b>Tržište</b> i klikni zeleni gumb <b>Kupi</b>.</p>`;
+  try{ const t=await api.myTrades();
+    $("myTrades").innerHTML = t.length ? t.map(x=>`<li><span>${x.side==="buy"?"🟢 Kupnja":"🔴 Prodaja"} ${x.qty}× ${esc(PL[x.player_id]?.name||x.player_id)}</span><span>${cr(x.total)} · ${ago(x.created_at)}</span></li>`).join("") : `<li class="sub">Još nema transakcija.</li>`;
+  }catch(e){ $("myTrades").innerHTML=`<li class="sub">${esc(e.message)}</li>`; }
 }
-function renderLeaderboard(){
-  const me={name:"Ti",score:score(),me:1};
-  const all=[...S.bots,me].sort((a,b)=>b.score-a.score);
-  const medal=i=>["🥇","🥈","🥉"][i]||"";
-  $("lbTable").innerHTML=`<tr><th>#</th><th>Menadžer</th><th>Rezultat</th></tr>`+
-    all.map((u,i)=>`<tr style="${u.me?"background:rgba(59,130,246,.15);font-weight:700":""}"><td>${i+1}. ${medal(i)}</td><td>${esc(u.name)}${u.me?" (ti)":' <span class="tag">simulirani</span>'}</td><td>${u.score}</td></tr>`).join("");
+async function renderBoard(){
+  try{ const rows=await api.leaderboard();
+    $("board").innerHTML=`<tr><th>#</th><th>Igrač</th><th>Krediti</th><th>Ukupno</th></tr>`+rows.map(r=>`<tr class="${r.is_me?"me":""}"><td>${r.rank}.${["","🥇","🥈","🥉"][r.rank]||""}</td><td>${esc(r.nickname)}${r.is_me?" (ti)":""}</td><td>${fmt(r.credits,0)}</td><td>${fmt(r.total,0)}</td></tr>`).join("");
+  }catch(e){ $("board").innerHTML=`<tr><td class="sub">${esc(e.message)}</td></tr>`; }
 }
+function render(){ renderHeader(); if(tab==="market") renderList(); if(tab==="mine") renderMine(); if(tab==="board") renderBoard(); }
+
+/* ---------- graf ---------- */
 function chartSVG(data){
-  const W=600,H=220,P=40; const mn=Math.min(...data),mx=Math.max(...data),sp=(mx-mn)||1;
-  const x=i=>P+(W-P-6)*(data.length<2?0:i/(data.length-1)), y=v=>8+(H-30)*(1-(v-mn)/sp);
-  const pts=data.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
-  const col=data[data.length-1]>=data[0]?"#22c55e":"#ef4444";
-  const grid=[0,0.5,1].map(f=>{const v=mn+sp*f;return `<line x1="${P}" x2="${W-6}" y1="${y(v)}" y2="${y(v)}" stroke="#253047"/><text x="2" y="${y(v)+4}" fill="#8b97ad" font-size="10">${fmt(v)}</text>`;}).join("");
-  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Graf kretanja vrijednosti (simulirani podaci)">
-    <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${col}" stop-opacity=".35"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></linearGradient></defs>
-    ${grid}<polygon points="${x(0)},${H-22} ${pts} ${x(data.length-1)},${H-22}" fill="url(#g)"/>
-    <polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2"/>
-    <text x="${W-6}" y="${H-6}" fill="#f59e0b" font-size="11" text-anchor="end">SIMULIRANI PODACI · mil. kredita</text></svg>`;
+  if(data.length<2) return `<p class="sub">Još nema dovoljno kupnji/prodaja za graf. Budi prvi! 🚀</p>`;
+  const W=600,H=200,P=44, v=data.map(d=>+d.price), mn=Math.min(...v), mx=Math.max(...v), sp=(mx-mn)||mx*0.1||1;
+  const x=i=>P+(W-P-6)*i/(v.length-1), y=val=>8+(H-28)*(1-(val-mn)/sp);
+  const pts=v.map((val,i)=>`${x(i).toFixed(1)},${y(val).toFixed(1)}`).join(" ");
+  const col=v[v.length-1]>=v[0]?"#22c55e":"#ef4444";
+  const grid=[0,.5,1].map(f=>{const val=mn+sp*f;return `<line x1="${P}" x2="${W-6}" y1="${y(val)}" y2="${y(val)}" stroke="#253047"/><text x="2" y="${y(val)+4}" fill="#8b97ad" font-size="11">${fmt(val,0)}</text>`;}).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Graf cijene"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${col}" stop-opacity=".35"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></linearGradient></defs>${grid}
+  <polygon points="${x(0)},${H-20} ${pts} ${x(v.length-1)},${H-20}" fill="url(#g)"/><polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2.5"/>
+  <text x="${P}" y="${H-4}" fill="#8b97ad" font-size="11">${new Date(data[0].ts).toLocaleDateString("hr-HR")}</text><text x="${W-6}" y="${H-4}" fill="#8b97ad" font-size="11" text-anchor="end">sada</text></svg>`;
 }
-function renderModal(){
-  if(!current) return;
-  const p=byId(current), c=chg(current), h=S.owned[current];
-  $("mAv").textContent=initials(p.name); $("mAv").style.background=colorFor(p.id);
-  $("mName").textContent=p.name; $("mSub").textContent=`${p.club} · ${POSN[p.pos]} · ${S.ppts[current]} bodova u sezoni`;
-  $("mPrice").textContent=cr(S.val[current])+" kredita";
-  $("mChange").innerHTML=`Promjena vrijednosti u ovom kolu: <span class="${c>=0?"up":"down"}">${pct(c)}</span>`;
-  const data = range===0 ? S.live[current] : S.hist[current].slice(-range);
-  $("chart").innerHTML = data.length<2 ? `<p class="sub">Prikupljanje podataka uživo… pričekaj nekoliko sekundi.</p>` : chartSVG(data);
-  const g=h?S.val[current]-h.buy:0;
-  $("mHold").innerHTML = h ? `Ovo je tvoj igrač · kupljen za ${cr(h.buy)} · trenutna ${g>=0?"zarada":"gubitak"}: <b class="${g>=0?"up":"down"}">${cr(Math.abs(g))}</b>` : `Slobodni krediti: ${cr(S.cash)}`;
-  $("buyBtn").disabled=!!h; $("sellBtn").disabled=!h;
-}
-function render(changed){
-  renderHeader(); renderNews(); renderRound();
-  if(tab==="trziste") renderList(changed);
-  if(tab==="momcad") renderSquad();
-  if(tab==="ljestvica") renderLeaderboard();
-  renderModal();
-}
-function msg(t,ok){ $("msg").innerHTML=`<span class="${ok?"up":"down"}">${t}</span>`; }
-function toast(t){ document.querySelectorAll(".toast").forEach(x=>x.remove()); const d=document.createElement("div"); d.className="toast"; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(),2500); }
 
-function transfer(type,pid){
-  const id=pid||current, p=byId(id), v=S.val[id]; let gain=0, text;
-  if(type==="buy"){
-    if(S.owned[id]) { text="Ovaj igrač je već tvoj."; if(!pid) msg(text,false); else toast(text); return; }
-    if(v>S.cash+1e-9){ text="Nemaš dovoljno virtualnih kredita."; if(!pid) msg(text,false); else toast(text); return; }
-    S.owned[id]={buy:v}; S.cash=r2(S.cash-v); text=`✅ Kupio si igrača ${p.name} za ${cr(v)}`;
-  } else {
-    if(!S.owned[id]) return;
-    gain=r2(v-S.owned[id].buy); delete S.owned[id]; S.cash=r2(S.cash+v);
-    text=`💰 Prodao si igrača ${p.name} za ${cr(v)} · ${gain>=0?"zarada":"gubitak"} ${cr(Math.abs(gain))}`;
-  }
-  S.tx.unshift({t:Date.now(),type,id,price:v,gain,round:S.round}); S.tx=S.tx.slice(0,200);
-  if(!pid) msg(text,true); else toast(text);
-  save(); render({});
+/* ---------- ekran igrača ---------- */
+function qty(){ return Math.max(1,Math.min(SETTINGS.max_per_trade, parseInt($("qty").value)||1)); }
+function renderQuote(){
+  if(!cur) return; const p=PL[cur], n=qty(), o=owned(cur);
+  const buyC=curve(p.base_price,p.k,p.shares_outstanding,n), after=p.base_price*(1+p.k*(p.shares_outstanding+n));
+  let t=`Kupnja ${n} kom.: <b>${cr(buyC)}</b> · cijena nakon kupnje ${fmt(after)}`;
+  if(o){ const m=Math.min(n,o), net=curve(p.base_price,p.k,p.shares_outstanding-m,m)*(1-SETTINGS.sell_fee), prof=net-HOLD[cur].avg_cost*m;
+    t+=`<br>Prodaja ${m} kom.: dobiješ <b>${cr(net)}</b> (${prof>=0?"zarada":"gubitak"} <span class="${prof>=0?"up":"down"}">${fmt(Math.abs(prof))}</span>, naknada 2 %)`; }
+  t+=`<br><span class="sub">Cijena raste sa svakim kupljenim komadom, pa je ukupni iznos veći od cijena × količina.</span>`;
+  $("quote").innerHTML=t;
+  $("buyBtn").disabled = !ME || buyC > ME.credits;
+  $("sellBtn").disabled = !o;
+  $("buyBtn").textContent = `Kupi ${n}`; $("sellBtn").textContent = o?`Prodaj ${Math.min(n,o)}`:"Prodaj";
 }
-function openPlayer(id){ current=id; $("msg").textContent=""; $("modal").classList.remove("hidden"); renderModal(); }
-function closeModal(){ current=null; $("modal").classList.add("hidden"); }
-function setTab(t){
-  tab=t; document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x.dataset.tab===t));
-  ["trziste","momcad","ljestvica","nagrade"].forEach(k=>$("tab-"+k).classList.toggle("hidden",k!==t)); $("howWrap").classList.toggle("hidden",t!=="trziste"); render({});
+function renderSheetHead(){
+  const p=PL[cur], c=chg(p), o=owned(cur);
+  $("sAv").textContent=initials(p.name); $("sAv").style.background=colorFor(p.id);
+  $("sName").textContent=p.name; $("sSub").textContent=`${p.club} · ${POSN[p.position]} · ${p.nationality}`;
+  $("sPrice").textContent=cr(p.price);
+  $("sMeta").innerHTML=`<span class="${c>0?"up":c<0?"down":"flat"}">${pct(c)}</span> u 24 h · 👥 ${p.holders_count} vlasnika · ${p.shares_outstanding} kupljenih komada`;
+  $("sOwn").innerHTML = o ? `Imaš <b>${o}</b> kom. · kupljeno po ${fmt(HOLD[cur].avg_cost)} · ako sve prodaš dobiješ ${cr(liq(cur,o))}` : `Nemaš ovog igrača. Slobodno: ${cr(ME?.credits||0)}`;
+  renderQuote();
 }
-document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
-function listClick(sel){ return e=>{ const b=e.target.closest("button[data-act]"); if(b){ e.stopPropagation(); transfer(b.dataset.act,b.dataset.id); return; } const r=e.target.closest(sel); if(r) openPlayer(r.dataset.id); }; }
-$("list").onclick=listClick(".row");
-$("pTable").onclick=listClick("tr[data-id]");
-["q","sort","filt"].forEach(i=>$(i).addEventListener("input",()=>renderList()));
-$("mClose").onclick=closeModal;
-$("modal").onclick=e=>{ if(e.target.id==="modal") closeModal(); };
-document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeModal(); });
-$("buyBtn").onclick=()=>transfer("buy"); $("sellBtn").onclick=()=>transfer("sell");
-$("range").onclick=e=>{const b=e.target.closest("button"); if(!b) return; range=+b.dataset.r; $("range").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b)); renderModal();};
-$("resetBtn").onclick=()=>{ if(confirm("Sigurno želiš resetirati igru? Tvoji igrači, bodovi i povijest bit će obrisani, a krediti vraćeni na 100 mil.")){ localStorage.removeItem(KEY); S=freshState(); addNews("Igra je resetirana. Početni budžet: 100 mil. virtualnih kredita.","info"); save(); render({}); toast("Igra je resetirana."); } };
-load(); save(); render({});
-setInterval(tick,TICK_MS);
-window.__demo={get state(){return S;},tick,openPlayer,setTab,transfer};
+async function loadSheetData(){
+  if(!cur) return; const id=cur;
+  try{
+    const [h,t]=await Promise.all([api.history(id),api.trades(id)]);
+    if(cur!==id) return;
+    $("sChart").innerHTML=chartSVG(h);
+    $("sTrades").innerHTML = t.length ? t.map(x=>`<li><span>${x.side==="buy"?"🟢":"🔴"} <b>${esc(x.profiles?.nickname||"igrač")}</b> ${x.side==="buy"?"kupio":"prodao"} ${x.qty}×</span><span>${fmt(x.price_after)} · ${ago(x.created_at)}</span></li>`).join("") : `<li class="sub">Još nitko nije trgovao ovim igračem.</li>`;
+  }catch(e){ $("sChart").innerHTML=`<p class="sub">${esc(e.message)}</p>`; }
+}
+function openSheet(id,mode){
+  cur=id; $("qty").value=1; $("sMsg").textContent=""; $("sChart").innerHTML='<p class="sub">Učitavanje grafa…</p>'; $("sTrades").innerHTML="";
+  $("sheetBg").classList.remove("hidden"); document.body.style.overflow="hidden";
+  renderSheetHead(); loadSheetData();
+}
+function closeSheet(){ cur=null; $("sheetBg").classList.add("hidden"); document.body.style.overflow=""; }
 
+async function refreshMe(){
+  const [prof,h]=await Promise.all([api.profile(),api.holdings()]);
+  ME=prof; HOLD={}; (h||[]).forEach(x=>HOLD[x.player_id]={qty:x.qty,avg_cost:+x.avg_cost});
+}
+async function refreshMarket(){ (await api.market()).forEach(p=>{ PL[p.id]={...p, price:+p.price, price_24h:+p.price_24h, base_price:+p.base_price, k:+p.k}; }); }
+
+async function trade(side){
+  if(!cur) return; const id=cur, n = side==="sell" ? Math.min(qty(),owned(id)) : qty();
+  $("buyBtn").disabled=$("sellBtn").disabled=true; $("sMsg").textContent="⏳ Obrađujem…";
+  try{
+    const r = side==="buy" ? await api.buy(id,n) : await api.sell(id,n);
+    await Promise.all([refreshMe(),refreshMarket()]);
+    const p=PL[id];
+    const txt = side==="buy" ? `✅ Kupio si ${n}× ${esc(p.name)} za ${cr(r.total)}` : `💰 Prodao si ${n}× ${esc(p.name)} za ${cr(r.total)}${r.profit!=null?` (${r.profit>=0?"zarada":"gubitak"} ${fmt(Math.abs(r.profit))})`:""}`;
+    $("sMsg").innerHTML=`<span class="up">${txt}</span>`; toast(txt);
+    render(); if(cur===id){ renderSheetHead(); loadSheetData(); }
+  }catch(e){ $("sMsg").innerHTML=`<span class="down">❌ ${esc(e.message)}</span>`; renderQuote(); }
+}
+
+/* ---------- događaji ---------- */
+document.querySelectorAll("nav.bottom button").forEach(b=>b.onclick=()=>{
+  tab=b.dataset.tab; document.querySelectorAll("nav.bottom button").forEach(x=>x.classList.toggle("on",x===b));
+  ["market","mine","board"].forEach(t=>$("tab-"+t).classList.toggle("hidden",t!==tab)); window.scrollTo(0,0); render();
+});
+function listClick(e){ const b=e.target.closest("button[data-act]"); const r=e.target.closest(".row"); if(b) openSheet(b.dataset.id,b.dataset.act); else if(r) openSheet(r.dataset.id); }
+$("list").onclick=listClick; $("mList").onclick=listClick;
+$("q").oninput=renderList; $("sort").onchange=renderList;
+$("chips").onclick=e=>{ const b=e.target.closest("button"); if(!b) return; filt=b.dataset.f; $("chips").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b)); renderList(); };
+$("sClose").onclick=closeSheet; $("sheetBg").onclick=e=>{ if(e.target.id==="sheetBg") closeSheet(); };
+$("minus").onclick=()=>{ $("qty").value=Math.max(1,qty()-1); renderQuote(); };
+$("plus").onclick=()=>{ $("qty").value=Math.min(SETTINGS.max_per_trade,qty()+1); renderQuote(); };
+$("qty").oninput=renderQuote;
+document.querySelector(".quick").onclick=e=>{ const b=e.target.closest("button"); if(!b) return; $("qty").value = b.dataset.q==="all" ? Math.max(1,Math.min(owned(cur),SETTINGS.max_per_trade)) : b.dataset.q; renderQuote(); };
+$("buyBtn").onclick=()=>trade("buy"); $("sellBtn").onclick=()=>trade("sell");
+$("howClose").onclick=()=>{ $("howBox").classList.add("hidden"); localStorage.setItem("burza-how-hidden","1"); };
+if(localStorage.getItem("burza-how-hidden")) $("howBox").classList.add("hidden");
+$("nickBtn").onclick=async()=>{
+  $("nickMsg").textContent="";
+  try{ ME=await api.setNickname($("nickInput").value); $("nickOverlay").classList.add("hidden"); await refreshMe(); render(); toast(`Dobro došao, ${esc(ME.nickname)}! Imaš ${cr(ME.credits)}.`); }
+  catch(e){ $("nickMsg").textContent=e.message; }
+};
+$("nickInput").onkeydown=e=>{ if(e.key==="Enter") $("nickBtn").click(); };
+
+/* ---------- realtime ---------- */
+function onPlayer(row){
+  const old=PL[row.id]; if(!old) return;
+  const base=+(row.base_price ?? old.base_price), k=+(row.k ?? old.k), sh=+(row.shares_outstanding ?? old.shares_outstanding);
+  PL[row.id]={...old, ...row, base_price:base, k, shares_outstanding:sh, price:Math.round(base*(1+k*sh)*100)/100}; // cijenu računamo sami (generirani stupci ne moraju stići kroz realtime)
+  flash[row.id]=1;
+  clearTimeout(onPlayer.t); onPlayer.t=setTimeout(render,250);
+  if(cur===row.id) renderSheetHead();
+}
+function onTrade(t){
+  if(t.user_id===api.uid) return;
+  const p=PL[t.player_id]; if(!p) return;
+  toast(`${t.side==="buy"?"🟢 Netko je kupio":"🔴 Netko je prodao"} ${t.qty}× ${esc(p.name)}`);
+  if(cur===t.player_id) loadSheetData();
+}
+
+/* ---------- start ---------- */
+(async function start(){
+  if(DEMO) $("demoBanner").classList.remove("hidden");
+  try{
+    if(!DEMO && !window.supabase) throw new Error("Ne mogu učitati Supabase biblioteku. Provjeri internetsku vezu.");
+    await api.init();
+    await Promise.all([refreshMarket(), refreshMe()]);
+    if(!ME){ $("nickOverlay").classList.remove("hidden"); setTimeout(()=>$("nickInput").focus(),100); }
+    render();
+    api.subscribe(onPlayer,onTrade);
+    setInterval(async()=>{ try{ await refreshMarket(); render(); }catch(e){} }, 60000);
+  }catch(e){ $("list").innerHTML=`<p class="down">⚠️ ${esc(e.message)}</p>`; console.error(e); }
+})();
+window.__app={api,get PL(){return PL;},get HOLD(){return HOLD;},get ME(){return ME;}};
 </script>
 </body>
 </html>
