@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fantasy Manager – kupi igrače, prati vrijednost (demo, virtualni krediti)</title>
+<style>
+:root{--bg:#0b0f17;--panel:#131a26;--panel2:#1a2333;--line:#253047;--txt:#e6ebf5;--mut:#8b97ad;--acc:#3b82f6;--up:#22c55e;--down:#ef4444;--warn:#f59e0b}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--txt);font-size:15px}
+button{font:inherit;cursor:pointer}
+.disclaimer{background:#3a2a06;color:#fcd34d;text-align:center;padding:8px 12px;font-size:13px;border-bottom:1px solid #5b4310}
+header{position:sticky;top:0;z-index:5;background:rgba(11,15,23,.95);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;max-width:1100px;margin:0 auto;flex-wrap:wrap}
+.logo{font-weight:800;font-size:19px}.logo span{color:var(--acc)}
+.bal{display:flex;gap:16px;font-size:13px;color:var(--mut)}.bal b{display:block;color:var(--txt);font-size:16px}
+nav{display:flex;gap:4px;max-width:1100px;margin:0 auto;padding:0 12px}
+nav button{background:none;border:0;color:var(--mut);padding:10px 14px;border-bottom:2px solid transparent}
+nav button.on{color:var(--txt);border-color:var(--acc)}
+main{max-width:1100px;margin:0 auto;padding:16px;display:grid;grid-template-columns:1fr 300px;gap:16px}
+@media(max-width:860px){main{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+h2{margin:0 0 12px;font-size:17px}
+.toolbar{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+input,select{background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:8px 10px;font:inherit}
+.row{display:grid;grid-template-columns:40px 1fr 110px 80px;align-items:center;gap:10px;padding:10px 6px;border-bottom:1px solid var(--line);cursor:pointer;border-radius:8px}
+.row:hover{background:var(--panel2)}
+.av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff}
+.nm{font-weight:600}.sub{color:var(--mut);font-size:12px}
+.pr{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.ch{text-align:right;font-variant-numeric:tabular-nums;font-size:13px;padding:3px 6px;border-radius:6px}
+.up{color:var(--up)}.down{color:var(--down)}
+.ch.up{background:rgba(34,197,94,.12)}.ch.down{background:rgba(239,68,68,.12)}
+.flash-up{animation:fu .8s}.flash-down{animation:fd .8s}
+@keyframes fu{from{background:rgba(34,197,94,.3)}}@keyframes fd{from{background:rgba(239,68,68,.3)}}
+.news{list-style:none;margin:0;padding:0;max-height:520px;overflow:auto}
+.news li{padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+.news .t{color:var(--mut);font-size:11px}
+.tag{display:inline-block;font-size:10px;background:#334155;color:#cbd5e1;padding:1px 6px;border-radius:4px;margin-left:4px;vertical-align:middle}
+.hidden{display:none!important}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:20;padding:12px}
+.mbox{background:var(--panel);border:1px solid var(--line);border-radius:14px;max-width:640px;width:100%;max-height:95vh;overflow:auto;padding:18px}
+.mhead{display:flex;gap:12px;align-items:center}.mhead .av{width:52px;height:52px;font-size:17px}
+.x{margin-left:auto;background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:8px;width:34px;height:34px}
+.big{font-size:26px;font-weight:800;margin:12px 0 2px}
+svg{width:100%;height:auto;display:block}
+.note{font-size:11px;color:var(--warn);margin-top:4px}
+.trade{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.trade input{width:90px}
+.btn{border:0;border-radius:8px;padding:9px 16px;font-weight:700;color:#fff}
+.buy{background:var(--up)}.sell{background:var(--down)}.ghost{background:var(--panel2);border:1px solid var(--line);color:var(--txt)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+.stat{background:var(--panel2);border-radius:10px;padding:10px}.stat .sub{margin-bottom:4px}.stat b{font-size:18px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+th:first-child,td:first-child{text-align:left}th{color:var(--mut);font-weight:500;font-size:12px}
+.tblwrap{overflow-x:auto}
+.msg{min-height:20px;font-size:13px;margin-top:8px}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--line);padding:10px 16px;border-radius:10px;z-index:30;font-size:14px}
+footer{max-width:1100px;margin:0 auto;padding:16px;color:var(--mut);font-size:12px;text-align:center}
+.tabs-range{display:flex;gap:4px;margin-top:8px}.tabs-range button{background:var(--panel2);border:1px solid var(--line);color:var(--mut);border-radius:6px;padding:3px 10px;font-size:12px}.tabs-range button.on{color:var(--txt);border-color:var(--acc)}
+</style>
+<style>
+main>*,section,aside{min-width:0}
+nav{overflow-x:auto}nav button{white-space:nowrap}
+@media(max-width:600px){
+ .row{grid-template-columns:36px auto 1fr 96px;row-gap:8px;column-gap:8px}
+ .row .av{grid-row:span 2;align-self:start}.row>div:nth-child(2){grid-column:2 / 5;grid-row:1}
+ .row .pr,.row .ch{white-space:nowrap}.row .av{grid-row:1!important}
+ .row .pr{grid-column:2;grid-row:2;text-align:left}.row .ch{grid-column:3;grid-row:2;justify-self:start}
+ .row .rowbtn{grid-column:4;grid-row:2}
+ .bal{gap:10px}.bal b{font-size:14px}main{padding:10px}.toolbar select{flex:1}
+ .how ol{font-size:15px}
+ .bal>div:nth-child(4),.bal>div:nth-child(5){display:none}
+ .bal{font-size:11px}
+}
+</style>
+</head>
+<body>
+<style>
+.pos-pill{display:inline-block;font-size:11px;padding:1px 6px;border-radius:4px;background:#334155;color:#cbd5e1;margin-right:4px}
+.pos-GK{background:#854d0e;color:#fef3c7}.pos-DEF{background:#1e3a8a;color:#dbeafe}.pos-MID{background:#14532d;color:#dcfce7}.pos-FWD{background:#7f1d1d;color:#fee2e2}
+.limits{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;font-size:13px}
+.limits div{background:var(--panel2);border-radius:8px;padding:6px 10px}
+.round{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--panel2);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:14px}
+.bar{flex:1;min-width:120px;height:6px;background:#253047;border-radius:3px;overflow:hidden}.bar i{display:block;height:100%;background:var(--acc)}
+.prize{display:flex;gap:12px;align-items:center;padding:12px;border-radius:10px;background:var(--panel2);margin-bottom:8px}
+.prize .medal{font-size:30px}
+.x-unused{background:linear-gradient(#14532d,#166534);border-radius:12px;padding:12px 6px;margin-bottom:14px;display:flex;flex-direction:column;gap:10px}
+.line{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.chip{display:flex;flex-direction:column;align-items:center;width:74px;font-size:11px;text-align:center;cursor:pointer}
+.chip .av{width:36px;height:36px;border:2px solid #fff3}
+.chip.empty .av{background:#0003;border:2px dashed #fff5}
+.how{background:linear-gradient(135deg,#1e3a8a55,#14532d55);border:1px solid #2b4a7a;border-radius:12px;padding:14px 16px;margin-bottom:16px}
+.how ol{margin:6px 0 8px;padding-left:22px;font-size:16px;line-height:1.7}
+.row{grid-template-columns:40px 1fr auto auto 96px}
+.rowbtn{border:0;border-radius:10px;padding:11px 0;width:96px;font-weight:800;font-size:16px;color:#fff}
+.rowbtn.buy{background:var(--up)}.rowbtn.sell{background:var(--down)}.rowbtn:disabled{opacity:.35;cursor:not-allowed}
+.gain{font-size:12px;font-weight:600}
+</style>
+<div class="disclaimer">⚠️ <b>DEMO IGRA</b> – koriste se isključivo <b>virtualni krediti</b> bez ikakve novčane vrijednosti. Nema pravog novca. Vrijednosti igrača, utakmice i događaji su simulirani.</div>
+<header>
+  <div class="top">
+    <div class="logo">⚽ Fantasy <span>Manager</span></div>
+    <div class="bal">
+      <div>Krediti<b id="hCash">–</b></div>
+      <div>Vrijednost mojih igrača<b id="hPort">–</b></div>
+      <div>Zarada<b id="hGain">–</b></div>
+      <div>Bodovi<b id="hPts">–</b></div>
+      <div>Rezultat<b id="hScore">–</b></div>
+    </div>
+  </div>
+  <nav>
+    <button data-tab="trziste" class="on">Igrači</button>
+    <button data-tab="momcad">Moji igrači</button>
+    <button data-tab="ljestvica">Ljestvica</button>
+    <button data-tab="nagrade">Nagrade</button>
+  </nav>
+</header>
+
+<main>
+  <section>
+    <div id="howWrap">
+      <div class="how" id="how">
+        <h2>Kako igrati?</h2>
+        <ol>
+          <li><b>Odaberi igrača</b> s popisa ispod.</li>
+          <li>Klikni zeleni gumb <b>Kupi</b>.</li>
+          <li><b>Prati kako mu raste vrijednost</b> i klikni <b>Prodaj</b> kad zaradiš.</li>
+        </ol>
+        <div class="sub">Imaš 100 mil. virtualnih kredita. Možeš kupiti koliko god igrača želiš dok ti ima kredita. Klikni na ime igrača za graf vrijednosti.</div>
+      </div>
+    </div>
+    <div class="round" id="roundBox"></div>
+
+    <div id="tab-trziste" class="card">
+      <h2>Igrači</h2>
+      <div class="toolbar">
+        <input id="q" placeholder="Pretraži igrača ili klub…" style="flex:1;min-width:160px">
+        <select id="sort">
+          <option value="price">Sortiraj: vrijednost</option>
+          <option value="change">Sortiraj: promjena u kolu</option>
+          <option value="own">Prvo moji igrači</option>
+          <option value="pts">Sortiraj: bodovi u sezoni</option>
+          <option value="name">Sortiraj: ime</option>
+        </select>
+        <select id="filt">
+          <option value="">Sve pozicije</option>
+          <option value="GK">Vratari</option><option value="DEF">Braniči</option>
+          <option value="MID">Vezni</option><option value="FWD">Napadači</option>
+          <option value="hr">🇭🇷 Hrvatski igrači</option>
+        </select>
+      </div>
+      <div id="list"></div>
+    </div>
+
+    <div id="tab-momcad" class="card hidden">
+      <h2>Moji igrači</h2>
+      <div class="stats" id="pStats"></div>
+      <div class="tblwrap"><table id="pTable"></table></div>
+      <h2 style="margin-top:20px">Povijest kupnji i prodaja</h2>
+      <div class="tblwrap"><table id="txTable"></table></div>
+      <div style="margin-top:18px"><button class="btn ghost" id="resetBtn">↺ Resetiraj igru (vrati na 100 mil. kredita)</button></div>
+    </div>
+
+    <div id="tab-ljestvica" class="card hidden">
+      <h2>Ljestvica menadžera</h2>
+      <p class="sub">Ostali menadžeri su izmišljeni (simulirani). Rezultat = bodovi iz događaja tvojih igrača + zarada (10 bodova za svaki 1 mil. kredita zarade iznad početnih 100 mil.).</p>
+      <div class="tblwrap"><table id="lbTable"></table></div>
+    </div>
+
+    <div id="tab-nagrade" class="card hidden">
+      <h2>Nagrade <span class="tag">PRIMJER</span></h2>
+      <p class="sub">Ovo je samo <b>primjer</b> kako bi mogle izgledati nagrade za najbolje menadžere na kraju sezone. U ovoj demo verziji nagrade se ne dodjeljuju.</p>
+      <div class="prize"><div class="medal">🥇</div><div><div class="nm">1. mjesto</div><div class="sub">Primjer: potpisani dres po izboru + 2 ulaznice za utakmicu</div></div></div>
+      <div class="prize"><div class="medal">🥈</div><div><div class="nm">2. mjesto</div><div class="sub">Primjer: originalni klupski dres</div></div></div>
+      <div class="prize"><div class="medal">🥉</div><div><div class="nm">3. mjesto</div><div class="sub">Primjer: službena nogometna lopta</div></div></div>
+      <div class="prize"><div class="medal">🎖️</div><div><div class="nm">4.–10. mjesto</div><div class="sub">Primjer: digitalna značka „Top 10 menadžer sezone”</div></div></div>
+      <div class="prize"><div class="medal">⭐</div><div><div class="nm">Menadžer kola</div><div class="sub">Primjer: posebna značka za najviše bodova u jednom kolu</div></div></div>
+      <p class="note">Napomena: nagrade, uvjeti sudjelovanja i način dodjele ovise o službenim pravilima igre. Prikazane nagrade služe isključivo kao ilustracija.</p>
+    </div>
+  </section>
+
+  <aside class="card">
+    <h2>Vijesti s utakmica <span class="tag">SIMULIRANO</span></h2>
+    <ul class="news" id="news"></ul>
+  </aside>
+</main>
+
+<footer>Demo igra · Virtualni krediti bez novčane vrijednosti · Sve vrijednosti su u milijunima virtualnih kredita (mil.) · Utakmice, događaji i vrijednosti igrača su simulirani i ne odražavaju stvarne događaje.</footer>
+
+<div class="modal hidden" id="modal">
+  <div class="mbox">
+    <div class="mhead">
+      <div class="av" id="mAv"></div>
+      <div><div class="nm" id="mName" style="font-size:18px"></div><div class="sub" id="mSub"></div></div>
+      <button class="x" id="mClose" aria-label="Zatvori">✕</button>
+    </div>
+    <div class="big" id="mPrice"></div>
+    <div id="mChange" class="sub"></div>
+    <div class="tabs-range" id="range">
+      <button data-r="30">30 dana</button><button data-r="90" class="on">90 dana</button><button data-r="0">Uživo</button>
+    </div>
+    <div id="chart" style="margin-top:8px"></div>
+    <div class="note">📊 Simulirani podaci – kretanje vrijednosti je generirano i ne predstavlja stvarne podatke.</div>
+    <div class="sub" id="mHold" style="margin-top:12px"></div>
+    <div class="trade">
+      <button class="btn buy" id="buyBtn">Kupi</button>
+      <button class="btn sell" id="sellBtn">Prodaj</button>
+    </div>
+    <div class="msg" id="msg"></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const START = 100, TICK_MS = 4000, TICKS_PER_ROUND = 8, ROUNDS = 38;
+const KEY = "fantasy-manager-v2";
+const POSN = {GK:"Vratar", DEF:"Branič", MID:"Vezni", FWD:"Napadač"};
+const POSP = {GK:"Vratari", DEF:"Braniči", MID:"Vezni", FWD:"Napadači"};
+const PLAYERS = [
+  {id:"livakovic",name:"Dominik Livaković",club:"Dinamo Zagreb",pos:"GK",hr:1,p:5.0},
+  {id:"courtois",name:"Thibaut Courtois",club:"Real Madrid",pos:"GK",p:6.0},
+  {id:"alisson",name:"Alisson Becker",club:"Liverpool",pos:"GK",p:5.6},
+  {id:"donnarumma",name:"Gianluigi Donnarumma",club:"Manchester City",pos:"GK",p:5.3},
+  {id:"gvardiol",name:"Joško Gvardiol",club:"Manchester City",pos:"DEF",hr:1,p:7.2},
+  {id:"sutalo",name:"Josip Šutalo",club:"Ajax",pos:"DEF",hr:1,p:4.8},
+  {id:"vandijk",name:"Virgil van Dijk",club:"Liverpool",pos:"DEF",p:6.4},
+  {id:"saliba",name:"William Saliba",club:"Arsenal",pos:"DEF",p:6.6},
+  {id:"hakimi",name:"Achraf Hakimi",club:"Paris Saint-Germain",pos:"DEF",p:6.8},
+  {id:"dias",name:"Rúben Dias",club:"Manchester City",pos:"DEF",p:6.0},
+  {id:"modric",name:"Luka Modrić",club:"AC Milan",pos:"MID",hr:1,p:6.5},
+  {id:"kovacic",name:"Mateo Kovačić",club:"Manchester City",pos:"MID",hr:1,p:5.9},
+  {id:"sucic",name:"Luka Sučić",club:"Real Sociedad",pos:"MID",hr:1,p:5.5},
+  {id:"bellingham",name:"Jude Bellingham",club:"Real Madrid",pos:"MID",p:11.5},
+  {id:"pedri",name:"Pedri",club:"FC Barcelona",pos:"MID",p:9.0},
+  {id:"rodri",name:"Rodri",club:"Manchester City",pos:"MID",p:8.6},
+  {id:"musiala",name:"Jamal Musiala",club:"Bayern München",pos:"MID",p:10.2},
+  {id:"wirtz",name:"Florian Wirtz",club:"Liverpool",pos:"MID",p:10.4},
+  {id:"kramaric",name:"Andrej Kramarić",club:"Hoffenheim",pos:"FWD",hr:1,p:7.0},
+  {id:"livaja",name:"Marko Livaja",club:"Hajduk Split",pos:"FWD",hr:1,p:6.2},
+  {id:"mbappe",name:"Kylian Mbappé",club:"Real Madrid",pos:"FWD",p:14.5},
+  {id:"haaland",name:"Erling Haaland",club:"Manchester City",pos:"FWD",p:14.8},
+  {id:"kane",name:"Harry Kane",club:"Bayern München",pos:"FWD",p:12.6},
+  {id:"yamal",name:"Lamine Yamal",club:"FC Barcelona",pos:"FWD",p:12.9},
+  {id:"salah",name:"Mohamed Salah",club:"Liverpool",pos:"FWD",p:12.8},
+  {id:"vinicius",name:"Vinícius Júnior",club:"Real Madrid",pos:"FWD",p:12.2},
+  {id:"saka",name:"Bukayo Saka",club:"Arsenal",pos:"FWD",p:10.5},
+];
+const BOTS = ["Ivana K.","Marko_ST","Dinamo1911","Hajdukovac","Ana P.","Tomislav R.","Vatreni99","Petra M.","Bili_Split","Luka_ZG","Osijek_Fan","Nika V."];
+const fmt = n => n.toLocaleString("hr-HR",{minimumFractionDigits:2,maximumFractionDigits:2});
+const cr = n => fmt(n)+" mil.";
+const pct = n => (n>=0?"+":"")+fmt(n)+" %";
+const $ = id => document.getElementById(id);
+const initials = n => n.split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
+const colorFor = id => { let h=0; for(const c of id) h=(h*31+c.charCodeAt(0))%360; return `hsl(${h} 55% 40%)`; };
+const r2 = n => Math.round(n*100)/100;
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function rnd(seed){ return ()=>{ seed=(seed*16807)%2147483647; return (seed-1)/2147483646; }; }
+
+function freshState(){
+  const val={}, open={}, hist={}, live={}, ppts={};
+  PLAYERS.forEach((pl,i)=>{
+    const r=rnd(1000+i*97); let v=pl.p; const arr=[pl.p];
+    for(let d=0; d<89; d++){ v=v/(1+(r()-0.5)*0.05); arr.unshift(r2(Math.max(1,v))); }
+    hist[pl.id]=arr; val[pl.id]=pl.p; open[pl.id]=pl.p; live[pl.id]=[pl.p]; ppts[pl.id]=0;
+  });
+  const bots=BOTS.map((n,i)=>({name:n,score:Math.round(rnd(50+i)()*40)}));
+  return {cash:START,owned:{},tx:[],val,open,hist,live,ppts,points:0,roundPts:0,round:1,tickInRound:0,season:"2026./27.",news:[],bots,history:[]};
+}
+let S;
+function load(){
+  try{ const raw=localStorage.getItem(KEY); if(raw){ S=JSON.parse(raw); if(S&&S.val&&PLAYERS.every(p=>S.val[p.id]!=null)) return; } }catch(e){}
+  S=freshState(); addNews("Dobro došli! Imaš 100 mil. virtualnih kredita. Kupi igrače i prodaj ih kad im vrijednost naraste.","info");
+}
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
+const byId = id => PLAYERS.find(p=>p.id===id);
+const chg = id => (S.val[id]/S.open[id]-1)*100;
+const ownedIds = () => Object.keys(S.owned);
+const ownedValue = () => ownedIds().reduce((s,id)=>s+S.val[id],0);
+const totalGain = () => S.cash+ownedValue()-START;
+const score = () => Math.round(S.points + totalGain()*10);
+function addNews(text,type){ S.news.unshift({t:Date.now(),text,type}); S.news=S.news.slice(0,50); }
+
+const EVENTS = [
+  {txt:"⚽ Gol!",pts:5,m:[0.03,0.06],not:["GK"]},
+  {txt:"🎯 Asistencija!",pts:3,m:[0.02,0.04],not:["GK"]},
+  {txt:"⭐ Igrač utakmice!",pts:4,m:[0.04,0.07]},
+  {txt:"🧤 Sjajna obrana!",pts:3,m:[0.02,0.04],only:["GK"]},
+  {txt:"🛡️ Utakmica bez primljenog gola!",pts:4,m:[0.02,0.04],only:["GK","DEF"]},
+  {txt:"🟨 Žuti karton.",pts:-1,m:[-0.02,-0.01]},
+  {txt:"🟥 Crveni karton!",pts:-3,m:[-0.07,-0.04]},
+  {txt:"🩹 Lakša ozljeda na treningu.",pts:0,m:[-0.09,-0.05]},
+  {txt:"❌ Promašen jedanaesterac.",pts:-2,m:[-0.05,-0.03],not:["GK"]},
+  {txt:"📰 Glasine o transferu u veći klub.",pts:0,m:[0.03,0.05]},
+  {txt:"🔁 Ostao na klupi.",pts:0,m:[-0.04,-0.02]},
+];
+function pickEvent(pl){
+  const ok=EVENTS.filter(e=>(!e.only||e.only.includes(pl.pos))&&(!e.not||!e.not.includes(pl.pos)));
+  return ok[Math.floor(Math.random()*ok.length)];
+}
+
+function tick(){
+  const changed={};
+  PLAYERS.forEach(pl=>{ const o=S.val[pl.id]; const n=r2(Math.max(1,o*(1+(Math.random()-0.5)*0.01))); S.val[pl.id]=n; changed[pl.id]=n>=o?"up":"down"; });
+  const nEv = Math.random()<0.5 ? 1 : (Math.random()<0.3?2:0);
+  for(let k=0;k<nEv;k++){
+    const pl=PLAYERS[Math.floor(Math.random()*PLAYERS.length)], ev=pickEvent(pl);
+    const m=ev.m[0]+Math.random()*(ev.m[1]-ev.m[0]); S.val[pl.id]=r2(Math.max(1,S.val[pl.id]*(1+m)));
+    changed[pl.id]=m>=0?"up":"down"; S.ppts[pl.id]+=ev.pts;
+    const mine=!!S.owned[pl.id];
+    if(mine){ S.points+=ev.pts; S.roundPts+=ev.pts; }
+    const ptxt = ev.pts ? ` · ${ev.pts>0?"+":""}${ev.pts} bod.` : "";
+    addNews(`${ev.txt} ${pl.name} (${pl.club}) – vrijednost ${pct(m*100)}${ptxt}${mine?" · <b>tvoj igrač</b>":""}`, m>=0?"up":"down");
+  }
+  PLAYERS.forEach(pl=>{ const L=S.live[pl.id]; L.push(S.val[pl.id]); if(L.length>150) L.shift(); });
+  S.tickInRound++;
+  if(S.tickInRound>=TICKS_PER_ROUND) endRound();
+  save(); render(changed);
+}
+function endRound(){
+  addNews(`🏁 Kolo ${S.round}. je završeno. Tvoji bodovi u kolu: ${S.roundPts}.`,"info");
+  S.history.unshift({round:S.round,pts:S.roundPts});
+  S.bots.forEach(b=>{ b.score+=Math.round(Math.random()*16-2); });
+  PLAYERS.forEach(pl=>{ const h=S.hist[pl.id]; h.push(S.val[pl.id]); if(h.length>200) h.shift(); S.open[pl.id]=S.val[pl.id]; });
+  S.tickInRound=0; S.roundPts=0; S.round++;
+  if(S.round>ROUNDS){
+    addNews(`🏆 Sezona ${S.season} je završena! Tvoj konačni rezultat: ${score()}. Počinje nova sezona.`,"info");
+    S.round=1; S.season="2027./28.";
+  }
+}
+
+let tab="trziste", current=null, range=90;
+
+function renderRound(){
+  const p=Math.round(S.tickInRound/TICKS_PER_ROUND*100);
+  $("roundBox").innerHTML=`<b>Sezona ${S.season}</b><span>Kolo ${S.round}./${ROUNDS}</span><div class="bar"><i style="width:${p}%"></i></div><span class="sub">tvoji bodovi u kolu: <b>${S.roundPts}</b></span><button class="btn ghost" id="nextRound" style="padding:5px 10px">Odigraj kolo ⏭</button>`;
+  $("nextRound").onclick=()=>{ while(S.tickInRound<TICKS_PER_ROUND-1) tick(); tick(); };
+}
+function renderList(changed={}){
+  const q=$("q").value.trim().toLowerCase(), s=$("sort").value, f=$("filt").value;
+  let arr=PLAYERS.filter(p=>(!q||(p.name+" "+p.club+" "+POSN[p.pos]).toLowerCase().includes(q)) && (!f||(f==="hr"?p.hr:p.pos===f)));
+  arr.sort((a,b)=> s==="price"?S.val[b.id]-S.val[a.id] : s==="change"?chg(b.id)-chg(a.id) : s==="own"?((S.owned[b.id]?1:0)-(S.owned[a.id]?1:0))||S.val[b.id]-S.val[a.id] : s==="pts"?S.ppts[b.id]-S.ppts[a.id] : a.name.localeCompare(b.name,"hr"));
+  $("list").innerHTML = arr.length ? arr.map(p=>{
+    const c=chg(p.id), fl=changed[p.id]?"flash-"+changed[p.id]:"";
+    const o=S.owned[p.id], g=o?S.val[p.id]-o.buy:0;
+    const btn = o ? `<button class="rowbtn sell" data-act="sell" data-id="${p.id}">Prodaj</button>`
+                  : `<button class="rowbtn buy" data-act="buy" data-id="${p.id}" ${S.val[p.id]>S.cash?"disabled title=\"Nemaš dovoljno kredita\"":""}>Kupi</button>`;
+    return `<div class="row ${fl}" data-id="${p.id}">
+      <div class="av" style="background:${colorFor(p.id)}">${initials(p.name)}</div>
+      <div><div class="nm">${p.name}${p.hr?' <span title="Hrvatska">🇭🇷</span>':""}${o?' <span class="tag">moj igrač</span>':""}</div><div class="sub"><span class="pos-pill pos-${p.pos}">${POSN[p.pos]}</span>${p.club} · ${S.ppts[p.id]} bod.</div>${o?`<div class="gain ${g>=0?"up":"down"}">Kupljen za ${cr(o.buy)} · ${g>=0?"zarada":"gubitak"} ${cr(Math.abs(g))}</div>`:""}</div>
+      <div class="pr">${cr(S.val[p.id])}</div>
+      <div class="ch ${c>=0?"up":"down"}">${pct(c)}</div>
+      ${btn}</div>`;
+  }).join("") : `<p class="sub">Nema rezultata.</p>`;
+}
+function renderHeader(){
+  const tg=totalGain(); $("hCash").textContent=cr(S.cash); $("hPort").textContent=cr(ownedValue()); $("hGain").textContent=(tg>=0?"+":"")+cr(tg); $("hGain").className=tg>=0?"up":"down"; $("hPts").textContent=S.points; $("hScore").textContent=score();
+}
+function renderNews(){
+  $("news").innerHTML=S.news.map(n=>`<li><div class="t">${new Date(n.t).toLocaleTimeString("hr-HR")} · simulirano</div><span class="${n.type==="up"?"up":n.type==="down"?"down":""}">${n.text}</span></li>`).join("");
+}
+function renderSquad(){
+  const ids=ownedIds(), ov=ownedValue();
+  let cost=0; ids.forEach(id=>cost+=S.owned[id].buy);
+  const open=ov-cost, tg=totalGain(), realized=tg-open;
+  $("pStats").innerHTML=`
+    <div class="stat"><div class="sub">Slobodni krediti</div><b>${cr(S.cash)}</b></div>
+    <div class="stat"><div class="sub">Vrijednost mojih igrača</div><b>${cr(ov)}</b></div>
+    <div class="stat"><div class="sub">Zarada na igračima koje imam</div><b class="${open>=0?"up":"down"}">${cr(open)}</b></div>
+    <div class="stat"><div class="sub">Zarada od prodanih igrača</div><b class="${realized>=0?"up":"down"}">${cr(realized)}</b></div>
+    <div class="stat"><div class="sub">Ukupna zarada</div><b class="${tg>=0?"up":"down"}">${cr(tg)}</b></div>
+    <div class="stat"><div class="sub">Bodovi · Rezultat</div><b>${S.points} · ${score()}</b></div>`;
+  $("pTable").innerHTML = ids.length ? `<tr><th>Igrač</th><th>Kupljen za</th><th>Vrijednost sada</th><th>Zarada</th><th>Bodovi</th><th></th></tr>`+
+    ids.map(id=>{const h=S.owned[id],v=S.val[id],d=v-h.buy;
+      return `<tr data-id="${id}" style="cursor:pointer"><td>${byId(id).name}<br><small class="sub">${POSN[byId(id).pos]} · ${byId(id).club}</small></td><td>${cr(h.buy)}</td><td>${cr(v)}</td><td class="${d>=0?"up":"down"}">${cr(d)}<br><small>${pct(d/h.buy*100)}</small></td><td>${S.ppts[id]}</td><td><button class="rowbtn sell" data-act="sell" data-id="${id}">Prodaj</button></td></tr>`;}).join("")
+    : `<tr><td class="sub" style="text-align:left">Još nemaš nijednog igrača. Otvori karticu „Igrači” i klikni zeleni gumb Kupi.</td></tr>`;
+  $("txTable").innerHTML = S.tx.length ? `<tr><th>Vrijeme</th><th>Vrsta</th><th>Igrač</th><th>Iznos</th><th>Zarada</th><th>Kolo</th></tr>`+
+    S.tx.slice(0,30).map(t=>`<tr><td>${new Date(t.t).toLocaleString("hr-HR")}</td><td class="${t.type==="buy"?"up":"down"}">${t.type==="buy"?"Kupnja":"Prodaja"}</td><td>${byId(t.id).name}</td><td>${cr(t.price)}</td><td class="${(t.gain||0)>=0?"up":"down"}">${t.type==="sell"?cr(t.gain):"–"}</td><td>${t.round}.</td></tr>`).join("")
+    : `<tr><td class="sub" style="text-align:left">Još nema kupnji ni prodaja.</td></tr>`;
+}
+function renderLeaderboard(){
+  const me={name:"Ti",score:score(),me:1};
+  const all=[...S.bots,me].sort((a,b)=>b.score-a.score);
+  const medal=i=>["🥇","🥈","🥉"][i]||"";
+  $("lbTable").innerHTML=`<tr><th>#</th><th>Menadžer</th><th>Rezultat</th></tr>`+
+    all.map((u,i)=>`<tr style="${u.me?"background:rgba(59,130,246,.15);font-weight:700":""}"><td>${i+1}. ${medal(i)}</td><td>${esc(u.name)}${u.me?" (ti)":' <span class="tag">simulirani</span>'}</td><td>${u.score}</td></tr>`).join("");
+}
+function chartSVG(data){
+  const W=600,H=220,P=40; const mn=Math.min(...data),mx=Math.max(...data),sp=(mx-mn)||1;
+  const x=i=>P+(W-P-6)*(data.length<2?0:i/(data.length-1)), y=v=>8+(H-30)*(1-(v-mn)/sp);
+  const pts=data.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+  const col=data[data.length-1]>=data[0]?"#22c55e":"#ef4444";
+  const grid=[0,0.5,1].map(f=>{const v=mn+sp*f;return `<line x1="${P}" x2="${W-6}" y1="${y(v)}" y2="${y(v)}" stroke="#253047"/><text x="2" y="${y(v)+4}" fill="#8b97ad" font-size="10">${fmt(v)}</text>`;}).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Graf kretanja vrijednosti (simulirani podaci)">
+    <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${col}" stop-opacity=".35"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></linearGradient></defs>
+    ${grid}<polygon points="${x(0)},${H-22} ${pts} ${x(data.length-1)},${H-22}" fill="url(#g)"/>
+    <polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2"/>
+    <text x="${W-6}" y="${H-6}" fill="#f59e0b" font-size="11" text-anchor="end">SIMULIRANI PODACI · mil. kredita</text></svg>`;
+}
+function renderModal(){
+  if(!current) return;
+  const p=byId(current), c=chg(current), h=S.owned[current];
+  $("mAv").textContent=initials(p.name); $("mAv").style.background=colorFor(p.id);
+  $("mName").textContent=p.name; $("mSub").textContent=`${p.club} · ${POSN[p.pos]} · ${S.ppts[current]} bodova u sezoni`;
+  $("mPrice").textContent=cr(S.val[current])+" kredita";
+  $("mChange").innerHTML=`Promjena vrijednosti u ovom kolu: <span class="${c>=0?"up":"down"}">${pct(c)}</span>`;
+  const data = range===0 ? S.live[current] : S.hist[current].slice(-range);
+  $("chart").innerHTML = data.length<2 ? `<p class="sub">Prikupljanje podataka uživo… pričekaj nekoliko sekundi.</p>` : chartSVG(data);
+  const g=h?S.val[current]-h.buy:0;
+  $("mHold").innerHTML = h ? `Ovo je tvoj igrač · kupljen za ${cr(h.buy)} · trenutna ${g>=0?"zarada":"gubitak"}: <b class="${g>=0?"up":"down"}">${cr(Math.abs(g))}</b>` : `Slobodni krediti: ${cr(S.cash)}`;
+  $("buyBtn").disabled=!!h; $("sellBtn").disabled=!h;
+}
+function render(changed){
+  renderHeader(); renderNews(); renderRound();
+  if(tab==="trziste") renderList(changed);
+  if(tab==="momcad") renderSquad();
+  if(tab==="ljestvica") renderLeaderboard();
+  renderModal();
+}
+function msg(t,ok){ $("msg").innerHTML=`<span class="${ok?"up":"down"}">${t}</span>`; }
+function toast(t){ document.querySelectorAll(".toast").forEach(x=>x.remove()); const d=document.createElement("div"); d.className="toast"; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(),2500); }
+
+function transfer(type,pid){
+  const id=pid||current, p=byId(id), v=S.val[id]; let gain=0, text;
+  if(type==="buy"){
+    if(S.owned[id]) { text="Ovaj igrač je već tvoj."; if(!pid) msg(text,false); else toast(text); return; }
+    if(v>S.cash+1e-9){ text="Nemaš dovoljno virtualnih kredita."; if(!pid) msg(text,false); else toast(text); return; }
+    S.owned[id]={buy:v}; S.cash=r2(S.cash-v); text=`✅ Kupio si igrača ${p.name} za ${cr(v)}`;
+  } else {
+    if(!S.owned[id]) return;
+    gain=r2(v-S.owned[id].buy); delete S.owned[id]; S.cash=r2(S.cash+v);
+    text=`💰 Prodao si igrača ${p.name} za ${cr(v)} · ${gain>=0?"zarada":"gubitak"} ${cr(Math.abs(gain))}`;
+  }
+  S.tx.unshift({t:Date.now(),type,id,price:v,gain,round:S.round}); S.tx=S.tx.slice(0,200);
+  if(!pid) msg(text,true); else toast(text);
+  save(); render({});
+}
+function openPlayer(id){ current=id; $("msg").textContent=""; $("modal").classList.remove("hidden"); renderModal(); }
+function closeModal(){ current=null; $("modal").classList.add("hidden"); }
+function setTab(t){
+  tab=t; document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x.dataset.tab===t));
+  ["trziste","momcad","ljestvica","nagrade"].forEach(k=>$("tab-"+k).classList.toggle("hidden",k!==t)); $("howWrap").classList.toggle("hidden",t!=="trziste"); render({});
+}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+function listClick(sel){ return e=>{ const b=e.target.closest("button[data-act]"); if(b){ e.stopPropagation(); transfer(b.dataset.act,b.dataset.id); return; } const r=e.target.closest(sel); if(r) openPlayer(r.dataset.id); }; }
+$("list").onclick=listClick(".row");
+$("pTable").onclick=listClick("tr[data-id]");
+["q","sort","filt"].forEach(i=>$(i).addEventListener("input",()=>renderList()));
+$("mClose").onclick=closeModal;
+$("modal").onclick=e=>{ if(e.target.id==="modal") closeModal(); };
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeModal(); });
+$("buyBtn").onclick=()=>transfer("buy"); $("sellBtn").onclick=()=>transfer("sell");
+$("range").onclick=e=>{const b=e.target.closest("button"); if(!b) return; range=+b.dataset.r; $("range").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b)); renderModal();};
+$("resetBtn").onclick=()=>{ if(confirm("Sigurno želiš resetirati igru? Tvoji igrači, bodovi i povijest bit će obrisani, a krediti vraćeni na 100 mil.")){ localStorage.removeItem(KEY); S=freshState(); addNews("Igra je resetirana. Početni budžet: 100 mil. virtualnih kredita.","info"); save(); render({}); toast("Igra je resetirana."); } };
+load(); save(); render({});
+setInterval(tick,TICK_MS);
+window.__demo={get state(){return S;},tick,openPlayer,setTab,transfer};
+
+</script>
+</body>
+</html>
