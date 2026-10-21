@@ -228,20 +228,38 @@ function supaApi(){
   return {
     async init(){
       let { data:{ session } } = await sb.auth.getSession();
-      if(!session){ const r = await sb.auth.signInAnonymously(); if(r.error) throw new Error("Prijava nije uspjela: "+r.error.message+" (je li u Supabase uključena anonimna prijava?)"); session=r.data.session; }
+      if(session){ const u = await sb.auth.getUser(); if(u.error || !u.data || !u.data.user){ try{ await sb.auth.signOut({scope:"local"}); }catch(e){} session=null; } }
+      if(!session){ session = await this.fresh(); }
       uid = session.user.id;
       const s = await sb.from("game_settings").select("*").maybeSingle(); if(s.data) SETTINGS=s.data;
     },
     async profile(){ return chk(await sb.from("profiles").select("*").eq("id",uid).maybeSingle()); },
-    async setNickname(n){ return chk(await sb.rpc("set_nickname",{p_nickname:n})); },
+    async fresh(){
+      try{ await sb.auth.signOut({scope:"local"}); }catch(e){}
+      try{ Object.keys(localStorage).filter(k=>k.startsWith("sb-")).forEach(k=>localStorage.removeItem(k)); }catch(e){}
+      const r = await sb.auth.signInAnonymously();
+      if(r.error) throw new Error("Prijava nije uspjela: "+r.error.message);
+      uid = r.data.session.user.id; return r.data.session;
+    },
+    async rpcSafe(fn,args){
+      let res = await sb.rpc(fn,args);
+      if(res.error && (res.error.code==="42501" || /permission denied|Nisi prijavljen|JWT/i.test(res.error.message||""))){
+        const { data:{ session } } = await sb.auth.getSession();
+        const r = session ? await sb.auth.refreshSession() : {error:true};
+        if(r.error) await this.fresh();
+        res = await sb.rpc(fn,args);
+      }
+      return chk(res);
+    },
+    async setNickname(n){ return this.rpcSafe("set_nickname",{p_nickname:n}); },
     async market(){ return chk(await sb.from("market").select("*")); },
     async holdings(){ return chk(await sb.from("holdings").select("*").eq("user_id",uid)); },
-    async buy(id,q){ return chk(await sb.rpc("buy_player",{p_player_id:id,p_qty:q})); },
-    async sell(id,q){ return chk(await sb.rpc("sell_player",{p_player_id:id,p_qty:q})); },
+    async buy(id,q){ return this.rpcSafe("buy_player",{p_player_id:id,p_qty:q}); },
+    async sell(id,q){ return this.rpcSafe("sell_player",{p_player_id:id,p_qty:q}); },
     async history(id){ return chk(await sb.from("price_history").select("price,ts").eq("player_id",id).order("ts",{ascending:false}).limit(300)).reverse(); },
     async trades(id){ return chk(await sb.from("trades").select("side,qty,total,price_after,created_at,user_id,profiles(nickname)").eq("player_id",id).order("created_at",{ascending:false}).limit(20)); },
     async myTrades(){ return chk(await sb.from("trades").select("player_id,side,qty,total,created_at").eq("user_id",uid).order("created_at",{ascending:false}).limit(30)); },
-    async leaderboard(){ return chk(await sb.rpc("get_leaderboard",{p_limit:100})); },
+    async leaderboard(){ return this.rpcSafe("get_leaderboard",{p_limit:100}); },
     subscribe(onPlayer,onTrade){
       sb.channel("market")
         .on("postgres_changes",{event:"UPDATE",schema:"public",table:"players"},p=>onPlayer(p.new))
